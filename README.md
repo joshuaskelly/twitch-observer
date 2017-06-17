@@ -1,6 +1,8 @@
-# twitch-observer
+# [![twitch-observer](.media/header.png)](#)
 
 [![License: GPL v3](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Python 2](https://img.shields.io/badge/python-2-blue.svg)]() [![Python 3](https://img.shields.io/badge/python-3-blue.svg)]()
+
+# twitch-observer
 
 Listens on a Twitch channel and gives you easy-to-use events.
 
