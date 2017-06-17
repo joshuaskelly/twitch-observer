@@ -75,27 +75,41 @@ class TwitchChatObserver(object):
         return result
 
     def start(self):
-        """Start watching the channel."""
+        """Start watching the channel.
+
+        Attempt to connect to the Twitch channel with the given nickname and
+        password. If successful a worker thread will be started to handle
+        socket communication.
+
+        Raises:
+            RuntimeError: If authentication fails
+        """
+
+        # Connect to Twitch via IRC
+        self._socket = socket.socket()
+        self._socket.connect(('irc.twitch.tv', 6667))
+        self._socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
+        self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
+        self._socket.send('JOIN {}\r\n'.format(self._channel).encode('utf-8'))
+
+        # Check to see if authentication failed
+        response = self._socket.recv(1024).decode('utf-8')
+        if response == ':tmi.twitch.tv NOTICE * :Login authentication failed\r\n':
+            self.stop()
+            raise RuntimeError('Login authentication failed')
 
         def worker():
-            # Connect to Twitch via IRC
-            self.socket = socket.socket()
-            self.socket.connect(('irc.twitch.tv', 6667))
-            self.socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
-            self.socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
-            self.socket.send('JOIN {}\r\n'.format(self._channel).encode('utf-8'))
-
             response_pattern = re.compile(':(\w*)!\w*@\w*.tmi.twitch.tv ([A-Z]*) ([\s\S]*)')
             message_pattern = re.compile('(#[\w]+) :([\s\S]*)')
 
             # Handle socket responses
             while self._is_running:
                 try:
-                    response = self.socket.recv(1024).decode('utf-8')
+                    response = self._socket.recv(1024).decode('utf-8')
 
                     # Confirm that we are still listening
                     if response == 'PING :tmi.twitch.tv\r\n':
-                        self.socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
+                        self._socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
 
                     for nick, cmd, args in [response_pattern.match(m).groups() for m in response.split('\r\n') if response_pattern.match(m)]:
                         event = TwitchChatEvent()
@@ -126,14 +140,25 @@ class TwitchChatObserver(object):
         self._worker_thread.start()
 
     def stop(self):
-        """Stops watching the channel"""
+        """Stops watching the channel.
+
+        The socket to Twitch will be shutdown and the worker thread will be
+        stopped.
+        """
 
         self._is_running = False
-        self.socket.shutdown(socket.SHUT_RDWR)
-        self.socket.close()
 
-    def join(self, timeout=None):
-        self._worker_thread.join(timeout)
+        if self._socket:
+            sock = self._socket
+            self._socket = None
+
+            sock.shutdown(socket.SHUT_RDWR)
+            sock.close()
+
+        if self._worker_thread:
+            worker = self._worker_thread
+            self._worker_thread = None
+            worker.join()
 
     def __enter__(self):
         self.start()
