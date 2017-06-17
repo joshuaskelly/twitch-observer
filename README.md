@@ -40,10 +40,10 @@ def handle_event(event):
         return
         
     if event.message == '!yes':
-        votes[event.nick] = 1
+        votes[event.nickname] = 1
         
     elif event.message == '!no':
-        votes[event.nick] = -1
+        votes[event.nickname] = -1
         
 
 observer = TwitchChatObserver('BotNick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
@@ -58,11 +58,12 @@ observer.stop()
 print('Voting is over!')
 
 time.sleep(2)
+tally = sum(votes.values())
 
-if votes > 0:
+if tally > 0:
     print('The yeas have it!')
 
-elif votes < 0:
+elif tally < 0:
     print('The nays have it!')
 
 else:
