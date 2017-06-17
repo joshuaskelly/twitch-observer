@@ -10,17 +10,19 @@ Listens on a Twitch channel and gives you easy-to-use events.
 
 #### Polling for Events
 
+Whenever a viewer joins chat, print out a greeting.
+
 ```python
 import time
 from twitchobserver import TwitchChatObserver
 
-with TwitchChatObserver('BotNick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel') as observer:
+with TwitchChatObserver('SkellyTwitchBot', 'oauth:hafb5zmpi1eezuyflsl19xn7ktmp5c', '#joshuaskelly') as observer:
     while True:
         try:
             for event in observer.get_events():
-                if event.command == 'PRIVMSG':
-                    print(event.message)
-                    
+                if event.command == 'JOIN':
+                    print('Greetings {}!'.format(event.nickname))
+
             time.sleep(1)
 
         except KeyboardInterrupt:
