@@ -135,31 +135,9 @@ class TwitchChatObserver(object):
     def join(self, timeout=None):
         self._worker_thread.join(timeout)
 
+    def __enter__(self):
+        self.start()
+        return self
 
-if __name__ == '__main__':
-    def echo(event):
-        if not event.type == 'TWITCHCHATEVENT':
-            return
-
-        if not event.command == 'PRIVMSG':
-            print('{} <{}> {}'.format(event.nickname, event.command, event.channel))
-
-        else:
-            print('{} <{}> {}: {}'.format(event.nickname, event.command, event.channel, event.message))
-
-    observer = TwitchChatObserver('SkellyTwitchBot', 'oauth:gk4b8xpjt2s66lwf7iz0el6m9zkm9u', '#joshuaskelly')
-    #observer.subscribe(echo)
-
-    observer.start()
-
-    try:
-        while True:
-            time.sleep(1)
-
-            for event in observer.get_events():
-                echo(event)
-
-    except KeyboardInterrupt:
-        observer.stop()
-
-    observer.join()
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
