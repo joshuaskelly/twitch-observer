@@ -1,0 +1,14 @@
+# Ignore IDE files
+.idea
+.vscode
+.vs
+/vs
+
+# Ignore OS artifacts
+.DS_Store
+
+# Ignore pyenv artifacts
+.python-version
+
+# Ignore compiled Python artifacts
+*.pyc
