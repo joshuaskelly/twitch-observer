@@ -66,7 +66,7 @@ Whenever a viewer joins chat, print out a greeting.
 import time
 from twitchobserver import TwitchChatObserver
 
-with TwitchChatObserver('SkellyTwitchBot', 'oauth:hafb5zmpi1eezuyflsl19xn7ktmp5c', '#joshuaskelly') as observer:
+with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel') as observer:
     while True:
         try:
             for event in observer.get_events():
@@ -100,7 +100,7 @@ def handle_event(event):
         votes[event.nickname] = -1
         
 
-observer = TwitchChatObserver('BotNick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
+observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
 observer.subscribe(handle_event)
 
 print('Voting has started!')
