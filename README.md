@@ -67,7 +67,7 @@ observer.stop()
 
 #### Polling for Events
 
-Whenever a viewer joins chat, print out a greeting.
+Whenever a viewer joins chat, print out a greeting. The ```TwitchChatObserver``` is created as a [context manager object](https://docs.python.org/3/reference/datamodel.html#context-managers) which will implicitly handle calling ```start()``` and ```stop()```.
 
 ```python
 import time
