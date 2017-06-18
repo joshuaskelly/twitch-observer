@@ -17,12 +17,12 @@ Turn Twitch chatter into Python events.
 
 ### 1. Installation
 
-To install twitch-observer you need to download this GitHub repo and call `pip` in your shell of choice:
+To install twitch-observer clone from the [repo](https://github.com/JoshuaSkelly/twitch-observer) and use:
 
 ```
-$ cd \path\to\twitch-observer
 $ pip install .
 ```
+Directly installing from PyPI will be supported in the future.
 
 ### 2. Create an Observer
 
