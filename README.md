@@ -6,6 +6,56 @@
 
 Turn Twitch chatter into Python events.
 
+## Usage
+
+### 1. Create an Observer
+
+To get Twitch chat events, you create an Observer that monitors a given channel. You will need to provide a username, OAuth token, and a Twitch channel name.
+
+*Note:* To get an OAuth token visit: http://twitchapps.com/tmi/
+
+```python
+from twitchobserver import TwitchChatObserver
+
+observer = TwitchChatObserver('BotNick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
+```
+
+### 2. Get Events
+
+The TwitchChatObserver class has methods to handle events both synchronously and asynchronously.
+
+#### a. Synchronous
+
+The ```TwitchChatObserver.get_events()``` method returns a sequence of ```TwitchChatEvents``` for processing.
+
+```python
+observer.start()
+
+while True:
+    try:
+        for event in observer.get_events():
+            """ Do something with the event """
+            
+    except KeyboardInterrupt:
+        break
+
+observer.stop()
+```
+
+#### b. Asynchronous
+
+The ```TwitchChatObserver.subscribe(callback)``` method takes a callback that is invoked when Twitch chat messages are recieved. 
+
+```python
+def event_handler(event):
+    """ Do something with the event """
+    
+observer.subscribe(event_handler)
+observer.start()
+# Wait a while
+observer.stop()
+```
+
 ## Examples
 
 #### Polling for Events
