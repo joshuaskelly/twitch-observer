@@ -17,7 +17,7 @@ To get Twitch chat events, you create an Observer that monitors a given channel.
 ```python
 from twitchobserver import TwitchChatObserver
 
-observer = TwitchChatObserver('BotNick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
+observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
 ```
 
 ### 2. Get Events
