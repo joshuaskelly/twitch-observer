@@ -1,4 +1,4 @@
-![twitch-observer](.media/header.png)
+# [![twitch-observer](.media/header.png)](https://github.com/JoshuaSkelly/twitch-observer)
 
 # twitch-observer
 
