@@ -140,6 +140,12 @@ else:
     print('Its a draw!')
 ```
 
+## Contributors
+
+[![Joshua Skelton](https://avatars.githubusercontent.com/u/372642?s=130)](http://github.com/joshuaskelly) | [![Felix Siebeneicker](https://avatars0.githubusercontent.com/u/13063023?s=130)](https://github.com/pythooonuser)
+---|---
+[Joshua Skelton](http://github.com/joshuaskelly) | [Felix Siebeneicker](https://github.com/pythooonuser)
+
 ## License
 MIT
 
