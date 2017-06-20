@@ -4,6 +4,10 @@ import threading
 import time
 
 
+class BadTwitchChatEvent(Exception):
+    pass
+
+
 class TwitchChatEvent(object):
     """A class for representing Twitch chat events.
     
@@ -19,15 +23,17 @@ class TwitchChatEvent(object):
             - PART
             - PRIVMSG
             
-        message: Optional. The message sent by the user. Only set with the 
-            'PRIVMSG' command, so check the command attribute before checking.
+        message: The message sent by the user.
     """
 
-    def __init__(self):
+    def __init__(self, channel=None, command=None, message=''):
         self.type = 'TWITCHCHATEVENT'
-        self.nickname = None
-        self.channel = None
-        self.command = None
+        self.channel = channel
+        self.command = command
+        self.message = message
+
+    def dumps(self):
+        return '{} #{}{}\r\n'.format(self.command, self.channel, ' :' + self.message if self.message else self.message)
 
 
 class TwitchChatObserver(object):
@@ -43,16 +49,23 @@ class TwitchChatObserver(object):
             the user's nickname.
     """
 
-    def __init__(self, nickname, password, channel):
+    def __init__(self, nickname, password, channel=None):
         self._nickname = nickname
         self._password = password
         self._channel = channel
         self._subscribers = []
-        self._worker_thread = None
+        self._inbound_worker_thread = None
+        self._outbound_worker_thread = None
         self._is_running = True
-        self._polling_rate = 20 / 30
         self._socket = None
-        self._event_queue = []
+        self._inbound_polling_rate = 30 / 40
+        self._outbound_send_rate = 30 / 20
+        self._inbound_event_queue = []
+        self._outbound_event_queue = []
+        self._inbound_lock = threading.Lock()
+        self._outbound_lock = threading.Lock()
+        self._socket_lock = threading.Lock()
+        self._last_time_sent = time.time()
 
     def subscribe(self, callback):
         """Receive events from watched channel.
@@ -63,16 +76,43 @@ class TwitchChatObserver(object):
 
         self._subscribers.append(callback)
 
-    def _notify(self, *args, **kwargs):
+    def notify(self, event):
+        """Sends an event
+        
+        Args:
+            event: A TwitchChatEvent to be sent
+        """
+
+        if not isinstance(event, TwitchChatEvent):
+            raise BadTwitchChatEvent('Invalid event type: {}'.format(type(event)))
+
+        self._outbound_event_queue.insert(0, event)
+
+    def _notify_subscribers(self, *args, **kwargs):
         for callback in self._subscribers:
             callback(*args, **kwargs)
 
     def get_events(self):
-        with threading.Lock():
-            result = self._event_queue[:]
-            self._event_queue = []
+        """Returns a sequence of events since the last time called
+        
+        Returns: A sequence of TwitchChatEvents
+        """
+
+        with self._inbound_lock:
+            result = self._inbound_event_queue[:]
+            self._inbound_event_queue = []
 
         return result
+
+    def send_events(self, *events):
+        """Queues up the given events for sending"""
+
+        with self._outbound_lock:
+            for event in events:
+                if not isinstance(event, TwitchChatEvent):
+                    raise BadTwitchChatEvent('Invalid event type: {}'.format(type(event)))
+
+                self._outbound_event_queue.append(event)
 
     def start(self):
         """Start watching the channel.
@@ -90,26 +130,37 @@ class TwitchChatObserver(object):
         self._socket.connect(('irc.twitch.tv', 6667))
         self._socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
         self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
-        self._socket.send('JOIN {}\r\n'.format(self._channel).encode('utf-8'))
+
+        if self._channel:
+            self._socket.send('JOIN #{}\r\n'.format(self._channel).encode('utf-8'))
 
         # Check to see if authentication failed
         response = self._socket.recv(1024).decode('utf-8')
+
+        self._socket.settimeout(0.25)
+
         if response == ':tmi.twitch.tv NOTICE * :Login authentication failed\r\n':
             self.stop()
             raise RuntimeError('Login authentication failed')
 
-        def worker():
+        def inbound_worker():
+            """Worker thread function that handles the incoming messages from
+            Twitch IRC.
+            """
+
             response_pattern = re.compile(':(\w*)!\w*@\w*.tmi.twitch.tv ([A-Z]*) ([\s\S]*)')
             message_pattern = re.compile('(#[\w]+) :([\s\S]*)')
 
             # Handle socket responses
             while self._is_running:
                 try:
-                    response = self._socket.recv(1024).decode('utf-8')
+                    with self._socket_lock:
+                        response = self._socket.recv(1024).decode('utf-8')
 
                     # Confirm that we are still listening
                     if response == 'PING :tmi.twitch.tv\r\n':
-                        self._socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
+                        with self._socket_lock:
+                            self._socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
 
                     for nick, cmd, args in [response_pattern.match(m).groups() for m in response.split('\r\n') if response_pattern.match(m)]:
                         event = TwitchChatEvent()
@@ -124,20 +175,44 @@ class TwitchChatObserver(object):
                             event.channel = channel
                             event.message = message
 
-                        self._notify(event)
+                        self._notify_subscribers(event)
 
-                        with threading.Lock():
-                            self._event_queue.append(event)
+                        with self._inbound_lock:
+                            self._inbound_event_queue.append(event)
 
-                    time.sleep(self._polling_rate)
+                    time.sleep(self._inbound_polling_rate)
 
                 except OSError:
                     # Forcing the socket to shutdown will result in this
                     # exception
                     pass
 
-        self._worker_thread = threading.Thread(target=worker)
-        self._worker_thread.start()
+        def outbound_worker():
+            """Worker thread function that handles the outgoing messages to
+            Twitch IRC.
+            
+            Warning:
+                Exceeding the Twitch message limit will result in a soft ban.
+            """
+
+            while self._is_running:
+                try:
+                    if time.time() - self._last_time_sent > self._outbound_send_rate and self._outbound_event_queue:
+                        event = self._outbound_event_queue.pop(0)
+
+                        with self._socket_lock:
+                            self._socket.send(event.dumps().encode('utf-8'))
+
+                        self._last_time_sent = time.time()
+
+                except OSError:
+                    pass
+
+        self._inbound_worker_thread = threading.Thread(target=inbound_worker)
+        self._inbound_worker_thread.start()
+
+        self._outbound_worker_thread = threading.Thread(target=outbound_worker)
+        self._outbound_worker_thread.start()
 
     def stop(self):
         """Stops watching the channel.
@@ -155,9 +230,14 @@ class TwitchChatObserver(object):
             sock.shutdown(socket.SHUT_RDWR)
             sock.close()
 
-        if self._worker_thread:
-            worker = self._worker_thread
-            self._worker_thread = None
+        if self._inbound_worker_thread:
+            worker = self._inbound_worker_thread
+            self._inbound_worker_thread = None
+            worker.join()
+
+        if self._outbound_worker_thread:
+            worker = self._outbound_worker_thread
+            self._outbound_worker_thread = None
             worker.join()
 
     def __enter__(self):
