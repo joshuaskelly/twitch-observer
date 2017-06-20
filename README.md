@@ -33,7 +33,7 @@ To get Twitch chat events, you create an Observer that monitors a given channel.
 ```python
 from twitchobserver import TwitchChatObserver
 
-observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
+observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 ```
 
 ### 3. Get Events
@@ -82,7 +82,7 @@ Whenever a viewer joins chat, print out a greeting. The ```TwitchChatObserver```
 import time
 from twitchobserver import TwitchChatObserver
 
-with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel') as observer:
+with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as observer:
     while True:
         try:
             for event in observer.get_events():
@@ -116,7 +116,7 @@ def handle_event(event):
         votes[event.nickname] = -1
         
 
-observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', '#channel')
+observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 observer.subscribe(handle_event)
 
 print('Voting has started!')
