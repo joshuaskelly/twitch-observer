@@ -45,8 +45,8 @@ class TwitchChatObserver(object):
 
         password: The OAuth token to authenticate with.
 
-        channel: The name of the channel to connect to. This is typically
-            the user's nickname.
+        channel: Optional. The name of the initial channel to connect to. This
+            is typically the user's nickname.
     """
 
     def __init__(self, nickname, password, channel=None):
@@ -115,7 +115,7 @@ class TwitchChatObserver(object):
                 self._outbound_event_queue.append(event)
 
     def start(self):
-        """Start watching the channel.
+        """Starts the observer
 
         Attempt to connect to the Twitch channel with the given nickname and
         password. If successful a worker thread will be started to handle
@@ -187,7 +187,7 @@ class TwitchChatObserver(object):
                     # exception
                     pass
 
-                except socket.error, e:
+                except socket.timeout as e:
                     if e.message != 'timed out':
                         raise socket.error
 
@@ -218,12 +218,20 @@ class TwitchChatObserver(object):
         self._outbound_worker_thread = threading.Thread(target=outbound_worker)
         self._outbound_worker_thread.start()
 
-    def stop(self):
-        """Stops watching the channel.
+    def stop(self, force_stop=False):
+        """Stops the observer
 
-        The socket to Twitch will be shutdown and the worker thread will be
-        stopped.
+        Stop watching the channel, shutdown the socket, and stop the worker
+        threads once all of the outbound events have been sent.
+
+        Args:
+            force_stop: Immediately stop and do not wait for remaining outbound
+                events to be sent.
         """
+
+        # Wait until all outbound events are sent
+        while self._outbound_event_queue and not force_stop:
+            time.sleep(self._outbound_send_rate)
 
         self._is_running = False
 
