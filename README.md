@@ -76,6 +76,10 @@ observer.join_channel('channel')
 observer.leave_channel('channel')
 ```
 
+## Tests
+
+```python -m unittest discover -s tests```
+
 ## Examples
 
 #### Polling for Events
