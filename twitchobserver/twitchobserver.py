@@ -192,7 +192,7 @@ class TwitchChatObserver(object):
 
                         elif cmd == 'PRIVMSG':
                             channel, message = message_pattern.match(args).groups()
-                            event.channel = channel
+                            event.channel = channel[1:]
                             event.message = message
 
                         self._notify_subscribers(event)
