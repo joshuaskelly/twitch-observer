@@ -12,3 +12,4 @@
 
 # Ignore compiled Python artifacts
 *.pyc
+*.egg-info

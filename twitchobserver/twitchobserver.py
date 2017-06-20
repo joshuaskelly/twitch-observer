@@ -114,6 +114,25 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
+    def send_message(self, message):
+        message_event = TwitchChatEvent(self._channel, "PRIVMSG", message)
+        self.send_events(message_event)
+
+    def join_channel(self, channel):
+        if channel is None:
+            return
+        if channel == self._channel:
+            return
+
+        self._channel = channel
+        join_event = TwitchChatEvent(self._channel, "JOIN")
+        self.send_events(join_event)
+
+    def leave_channel(self):
+        leave_event = TwitchChatEvent(self._channel, "PART")
+        self._channel = None
+        self.send_events(leave_event)
+
     def start(self):
         """Starts the observer
 
@@ -130,9 +149,6 @@ class TwitchChatObserver(object):
         self._socket.connect(('irc.twitch.tv', 6667))
         self._socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
         self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
-
-        if self._channel:
-            self._socket.send('JOIN #{}\r\n'.format(self._channel).encode('utf-8'))
 
         # Check to see if authentication failed
         response = self._socket.recv(1024).decode('utf-8')
@@ -217,6 +233,8 @@ class TwitchChatObserver(object):
 
         self._outbound_worker_thread = threading.Thread(target=outbound_worker)
         self._outbound_worker_thread.start()
+
+        self.join_channel(self._channel)
 
     def stop(self, force_stop=False):
         """Stops the observer
