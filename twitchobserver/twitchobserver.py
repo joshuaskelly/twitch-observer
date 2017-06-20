@@ -125,11 +125,13 @@ class TwitchChatObserver(object):
         """Joins a channel.
         """
 
-        self._channel = channel
-        join_event = TwitchChatEvent(self._channel, "JOIN")
+        join_event = TwitchChatEvent(channel, "JOIN")
         self.send_events(join_event)
 
     def leave_channel(self, channel):
+        """Leaves a channel.
+        """
+        
         leave_event = TwitchChatEvent(channel, "PART")
         self.send_events(leave_event)
 
@@ -149,6 +151,9 @@ class TwitchChatObserver(object):
         self._socket.connect(('irc.twitch.tv', 6667))
         self._socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
         self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
+
+        if self._channel:
+            self.join_channel(self._channel)
 
         # Check to see if authentication failed
         response = self._socket.recv(1024).decode('utf-8')
@@ -184,6 +189,8 @@ class TwitchChatObserver(object):
                         event.command = cmd
 
                         if cmd == 'JOIN' or cmd == 'PART':
+                            if args.startswith("#"):
+                                args = args[1:]
                             event.channel = args
 
                         elif cmd == 'PRIVMSG':
@@ -233,9 +240,6 @@ class TwitchChatObserver(object):
 
         self._outbound_worker_thread = threading.Thread(target=outbound_worker)
         self._outbound_worker_thread.start()
-
-        if self._channel:
-            self.join_channel(self._channel)
 
     def stop(self, force_stop=False):
         """Stops the observer
