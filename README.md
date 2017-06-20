@@ -87,7 +87,7 @@ with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel
         try:
             for event in observer.get_events():
                 if event.command == 'JOIN':
-                    print('Greetings {}!'.format(event.nickname))
+                    observer.send_message('Greetings {}!'.format(event.nickname), 'channel')
 
             time.sleep(1)
 
@@ -119,25 +119,25 @@ def handle_event(event):
 observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 observer.subscribe(handle_event)
 
-print('Voting has started!')
+observer.send_message('Voting has started!', 'channel')
 
 observer.start()
 time.sleep(60)
 observer.stop()
 
-print('Voting is over!')
+observer.send_message('Voting is over!', 'channel')
 
 time.sleep(2)
 tally = sum(votes.values())
 
 if tally > 0:
-    print('The yeas have it!')
+    observer.send_message('The yeas have it!', 'channel')
 
 elif tally < 0:
-    print('The nays have it!')
+    observer.send_message('The nays have it!', 'channel')
 
 else:
-    print('Its a draw!')
+    observer.send_message('Its a draw!', 'channel')
 ```
 
 ## Contributors
