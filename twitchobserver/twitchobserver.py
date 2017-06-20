@@ -114,23 +114,23 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
-    def send_message(self, message):
-        message_event = TwitchChatEvent(self._channel, "PRIVMSG", message)
+    def send_message(self, message, channel):
+        """Sends a message to a channel.
+        """
+
+        message_event = TwitchChatEvent(channel, "PRIVMSG", message)
         self.send_events(message_event)
 
     def join_channel(self, channel):
-        if channel is None:
-            return
-        if channel == self._channel:
-            return
+        """Joins a channel.
+        """
 
         self._channel = channel
         join_event = TwitchChatEvent(self._channel, "JOIN")
         self.send_events(join_event)
 
-    def leave_channel(self):
-        leave_event = TwitchChatEvent(self._channel, "PART")
-        self._channel = None
+    def leave_channel(self, channel):
+        leave_event = TwitchChatEvent(channel, "PART")
         self.send_events(leave_event)
 
     def start(self):
@@ -234,7 +234,8 @@ class TwitchChatObserver(object):
         self._outbound_worker_thread = threading.Thread(target=outbound_worker)
         self._outbound_worker_thread.start()
 
-        self.join_channel(self._channel)
+        if self._channel:
+            self.join_channel(self._channel)
 
     def stop(self, force_stop=False):
         """Stops the observer
