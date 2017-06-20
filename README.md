@@ -38,6 +38,10 @@ observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'c
 
 ### 3. Get Events
 
+The TwitchChatObserver class has methods to handle events both synchronously and asynchronously.
+
+#### a. Synchronous
+
 The ```TwitchChatObserver.get_events()``` method returns a sequence of ```TwitchChatEvents``` for processing.
 
 ```python
@@ -52,6 +56,20 @@ while True:
         break
 
 observer.stop()
+```
+
+#### b. Asynchronous
+
+The ```TwitchChatObserver.subscribe(callback)``` method takes a callback that is invoked when Twitch chat messages are recieved. 
+
+```python
+ def event_handler(event):
+     """ Do something with the event """
+     
+ observer.subscribe(event_handler)
+ observer.start()
+ # Wait a while
+ observer.stop()
 ```
 
 ### 4. Send Events
