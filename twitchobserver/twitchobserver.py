@@ -118,22 +118,19 @@ class TwitchChatObserver(object):
         """Sends a message to a channel.
         """
 
-        message_event = TwitchChatEvent(channel, "PRIVMSG", message)
-        self.send_events(message_event)
+        self.send_events(TwitchChatEvent(channel, "PRIVMSG", message))
 
     def join_channel(self, channel):
         """Joins a channel.
         """
 
-        join_event = TwitchChatEvent(channel, "JOIN")
-        self.send_events(join_event)
+        self.send_events(TwitchChatEvent(channel, "JOIN"))
 
     def leave_channel(self, channel):
         """Leaves a channel.
         """
         
-        leave_event = TwitchChatEvent(channel, "PART")
-        self.send_events(leave_event)
+        self.send_events(TwitchChatEvent(channel, "PART"))
 
     def start(self):
         """Starts the observer
