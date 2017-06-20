@@ -187,6 +187,10 @@ class TwitchChatObserver(object):
                     # exception
                     pass
 
+                except socket.error, e:
+                    if e.message != 'timed out':
+                        raise socket.error
+
         def outbound_worker():
             """Worker thread function that handles the outgoing messages to
             Twitch IRC.
