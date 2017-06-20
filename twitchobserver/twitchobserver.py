@@ -114,6 +114,24 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
+    def send_message(self, message, channel):
+        """Sends a message to a channel.
+        """
+
+        self.send_events(TwitchChatEvent(channel, "PRIVMSG", message))
+
+    def join_channel(self, channel):
+        """Joins a channel.
+        """
+
+        self.send_events(TwitchChatEvent(channel, "JOIN"))
+
+    def leave_channel(self, channel):
+        """Leaves a channel.
+        """
+        
+        self.send_events(TwitchChatEvent(channel, "PART"))
+
     def start(self):
         """Starts the observer
 
@@ -132,7 +150,7 @@ class TwitchChatObserver(object):
         self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
 
         if self._channel:
-            self._socket.send('JOIN #{}\r\n'.format(self._channel).encode('utf-8'))
+            self.join_channel(self._channel)
 
         # Check to see if authentication failed
         response = self._socket.recv(1024).decode('utf-8')
@@ -168,6 +186,8 @@ class TwitchChatObserver(object):
                         event.command = cmd
 
                         if cmd == 'JOIN' or cmd == 'PART':
+                            if args.startswith("#"):
+                                args = args[1:]
                             event.channel = args
 
                         elif cmd == 'PRIVMSG':
