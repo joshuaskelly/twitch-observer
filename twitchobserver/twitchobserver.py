@@ -76,18 +76,6 @@ class TwitchChatObserver(object):
 
         self._subscribers.append(callback)
 
-    def notify(self, event):
-        """Sends an event
-        
-        Args:
-            event: A TwitchChatEvent to be sent
-        """
-
-        if not isinstance(event, TwitchChatEvent):
-            raise BadTwitchChatEvent('Invalid event type: {}'.format(type(event)))
-
-        self._outbound_event_queue.insert(0, event)
-
     def _notify_subscribers(self, *args, **kwargs):
         for callback in self._subscribers:
             callback(*args, **kwargs)
