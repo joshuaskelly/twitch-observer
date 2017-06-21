@@ -187,7 +187,7 @@ class TwitchChatObserver(object):
                         with self._inbound_lock:
                             self._inbound_event_queue.append(event)
 
-                    time.sleep(1 / self._inbound_poll_rate)
+                    time.sleep(self._inbound_poll_rate)
 
                 except OSError:
                     # Forcing the socket to shutdown will result in this
@@ -208,7 +208,7 @@ class TwitchChatObserver(object):
 
             while self._is_running:
                 try:
-                    if self._outbound_event_queue and time.time() - self._last_time_sent > (1 / self._outbound_send_rate):
+                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_rate:
                         with self._outbound_lock:
                             event = self._outbound_event_queue.pop(0)
 
@@ -217,7 +217,7 @@ class TwitchChatObserver(object):
 
                         self._last_time_sent = time.time()
 
-                    time.sleep(2 / self._outbound_send_rate)
+                    time.sleep(self._outbound_send_rate / 2)
 
                 except OSError:
                     pass
@@ -241,7 +241,7 @@ class TwitchChatObserver(object):
 
         # Wait until all outbound events are sent
         while self._outbound_event_queue and not force_stop:
-            time.sleep(1 / self._outbound_send_rate)
+            time.sleep(self._outbound_send_rate)
 
         self._is_running = False
 
