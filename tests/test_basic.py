@@ -34,7 +34,7 @@ class B(unittest.TestCase):
             self.assertIsNotNone(observer._outbound_worker_thread, 'Outbound worker thread should be running')
             self.assertTrue(observer._is_running, 'The observer should be running')
 
-            observer.stop()
+            observer.stop(force_stop=True)
 
             self.assertIsNone(observer._inbound_worker_thread, 'Inbound worker thread should not be running')
             self.assertIsNone(observer._outbound_worker_thread, 'Outbound worker thread should not be running')
@@ -47,17 +47,17 @@ class B(unittest.TestCase):
             with self.assertRaises(RuntimeError):
                 observer = TwitchChatObserver('nickname', 'password123', 'channel')
                 observer.start()
-                observer.stop()
+                observer.stop(force_stop=True)
 
     def test_server_ping(self):
         with mock.patch('socket.socket') as mock_socket:
-            mock_socket.return_value.recv.side_effect = [SUCCESSFUL_LOGIN_MESSAGE, SERVER_PING_MESSAGE] + [OSError] * 1000
+            mock_socket.return_value.recv.side_effect = [SUCCESSFUL_LOGIN_MESSAGE, SERVER_PING_MESSAGE]
 
             observer = TwitchChatObserver('nickname', 'password123', 'channel')
             observer.start()
             self.assertEqual(mock_socket.return_value.recv.call_count, 2, 'Socket recv should be called twice')
             self.assertEqual(mock_socket.return_value.send.call_args[0][0], CLIENT_PONG_MESSAGE, 'Client should respond with PONG response')
-            observer.stop()
+            observer.stop(force_stop=True)
 
 
 if __name__ == '__main__':

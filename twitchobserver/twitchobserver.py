@@ -147,7 +147,7 @@ class TwitchChatObserver(object):
         self._socket.settimeout(0.25)
 
         if response == ':tmi.twitch.tv NOTICE * :Login authentication failed\r\n':
-            self.stop()
+            self.stop(force_stop=True)
             raise RuntimeError('Login authentication failed')
 
         def inbound_worker():
