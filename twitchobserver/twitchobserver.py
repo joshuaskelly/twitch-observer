@@ -194,6 +194,10 @@ class TwitchChatObserver(object):
                     # exception
                     pass
 
+                except StopIteration:
+                    # Raised by test mock under Python 2
+                    pass
+
                 except socket.timeout as e:
                     if e.message != 'timed out':
                         raise socket.error
@@ -246,11 +250,12 @@ class TwitchChatObserver(object):
         self._is_running = False
 
         if self._socket:
-            sock = self._socket
-            self._socket = None
+            with self._socket_lock:
+                sock = self._socket
+                self._socket = None
 
-            sock.shutdown(socket.SHUT_RDWR)
-            sock.close()
+                sock.shutdown(socket.SHUT_RDWR)
+                sock.close()
 
         if self._inbound_worker_thread:
             worker = self._inbound_worker_thread

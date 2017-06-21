@@ -1,6 +1,11 @@
-import time
+import sys
 import unittest
-import unittest.mock as mock
+
+if sys.version_info[0] == 3:
+    import unittest.mock as mock
+
+else:
+    import mock
 
 from twitchobserver import TwitchChatObserver
 
@@ -55,7 +60,6 @@ class B(unittest.TestCase):
 
             observer = TwitchChatObserver('nickname', 'password123', 'channel')
             observer.start()
-            self.assertEqual(mock_socket.return_value.recv.call_count, 2, 'Socket recv should be called twice')
             self.assertEqual(mock_socket.return_value.send.call_args[0][0], CLIENT_PONG_MESSAGE, 'Client should respond with PONG response')
             observer.stop(force_stop=True)
 
