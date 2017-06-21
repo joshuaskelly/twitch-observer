@@ -63,14 +63,40 @@ observer.stop()
 The ```TwitchChatObserver.subscribe(callback)``` method takes a callback that is invoked when Twitch chat messages are recieved. 
 
 ```python
-def event_handler(event):
-    """ Do something with the event """
-    
-observer.subscribe(event_handler)
-observer.start()
-# Wait a while
-observer.stop()
+ def event_handler(event):
+     """ Do something with the event """
+     
+ observer.subscribe(event_handler)
+ observer.start()
+ # Wait a while
+ observer.stop()
 ```
+
+### 4. Send Events
+
+```TwitchChatObserver``` provides three methods to make talking to Twitch super easy.
+
+#### Sending Messages
+
+```python
+observer.send_message('message', 'channel')
+```
+
+#### Joining a Channel
+
+```python
+observer.join_channel('channel')
+```
+
+#### Leaving a Channel
+
+```python
+observer.leave_channel('channel')
+```
+
+## Tests
+
+```python -m unittest discover -s tests```
 
 ## Examples
 
@@ -87,7 +113,7 @@ with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel
         try:
             for event in observer.get_events():
                 if event.command == 'JOIN':
-                    observer.send_message("Greetings {}!".format(event.nickname), "channel")
+                    observer.send_message('Greetings {}!'.format(event.nickname), 'channel')
 
             time.sleep(1)
 
@@ -119,25 +145,25 @@ def handle_event(event):
 observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 observer.subscribe(handle_event)
 
-observer.send_message("Voting has started!", "channel")
+observer.send_message('Voting has started!', 'channel')
 
 observer.start()
 time.sleep(60)
 observer.stop()
 
-observer.send_message("Voting is over!", "channel")
+observer.send_message('Voting is over!', 'channel')
 
 time.sleep(2)
 tally = sum(votes.values())
 
 if tally > 0:
-    observer.send_message("The yeas have it!", "channel")
+    observer.send_message('The yeas have it!', 'channel')
 
 elif tally < 0:
-    observer.send_message("The nays have it!", "channel")
+    observer.send_message('The nays have it!', 'channel')
 
 else:
-    observer.send_message("Its a draw!", "channel")
+    observer.send_message('Its a draw!', 'channel')
 ```
 
 ## Contributors

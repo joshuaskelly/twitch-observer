@@ -76,18 +76,6 @@ class TwitchChatObserver(object):
 
         self._subscribers.append(callback)
 
-    def notify(self, event):
-        """Sends an event
-        
-        Args:
-            event: A TwitchChatEvent to be sent
-        """
-
-        if not isinstance(event, TwitchChatEvent):
-            raise BadTwitchChatEvent('Invalid event type: {}'.format(type(event)))
-
-        self._outbound_event_queue.insert(0, event)
-
     def _notify_subscribers(self, *args, **kwargs):
         for callback in self._subscribers:
             callback(*args, **kwargs)
@@ -192,7 +180,7 @@ class TwitchChatObserver(object):
 
                         elif cmd == 'PRIVMSG':
                             channel, message = message_pattern.match(args).groups()
-                            event.channel = channel
+                            event.channel = channel[1:]
                             event.message = message
 
                         self._notify_subscribers(event)
@@ -221,13 +209,16 @@ class TwitchChatObserver(object):
 
             while self._is_running:
                 try:
-                    if time.time() - self._last_time_sent > self._outbound_send_rate and self._outbound_event_queue:
-                        event = self._outbound_event_queue.pop(0)
+                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_rate:
+                        with self._outbound_lock:
+                            event = self._outbound_event_queue.pop(0)
 
                         with self._socket_lock:
                             self._socket.send(event.dumps().encode('utf-8'))
 
                         self._last_time_sent = time.time()
+
+                    time.sleep(self._outbound_send_rate / 2)
 
                 except OSError:
                     pass
