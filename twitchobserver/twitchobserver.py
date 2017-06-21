@@ -221,13 +221,16 @@ class TwitchChatObserver(object):
 
             while self._is_running:
                 try:
-                    if time.time() - self._last_time_sent > self._outbound_send_rate and self._outbound_event_queue:
-                        event = self._outbound_event_queue.pop(0)
+                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_rate:
+                        with self._outbound_lock:
+                            event = self._outbound_event_queue.pop(0)
 
                         with self._socket_lock:
                             self._socket.send(event.dumps().encode('utf-8'))
 
                         self._last_time_sent = time.time()
+
+                    time.sleep(self._outbound_send_rate / 2)
 
                 except OSError:
                     pass
