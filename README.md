@@ -23,12 +23,6 @@ To install twitch-observer clone from the [repo](https://github.com/JoshuaSkelly
 $ pip install .
 ```
 
-You can also use the makefile by typing:
-
-```
-$ make
-```
-
 Directly installing from PyPI will be supported in the future.
 
 ### 2. Create an Observer
@@ -99,21 +93,6 @@ observer.join_channel('channel')
 
 ```python
 observer.leave_channel('channel')
-```
-
-### 5. Deinstallation
-
-To deinstall twitch-observer run:
-
-```
-$ pip uninstall twitchobserver
-```
-
-You can also use the makefile by typing:
-
-```
-$ make uninstall
-$ make clean
 ```
 
 ## Tests
