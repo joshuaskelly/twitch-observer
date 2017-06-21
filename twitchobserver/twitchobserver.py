@@ -12,7 +12,7 @@ class TwitchChatEvent(object):
     """A class for representing Twitch chat events.
     
     Attributes:
-        type: Type of the event. Always will be 'TWITCHCHATEVENT'
+        type: Type of the event. Always will be 'TWITCHCHATEVENT'.
         
         nickname: The nickname of the user.
         
@@ -59,7 +59,7 @@ class TwitchChatObserver(object):
         self._is_running = True
         self._socket = None
         self._inbound_polling_rate = 30 / 40
-        self._outbound_send_rate = 30 / 20
+        self._outbound_sending_rate = 30 / 20
         self._inbound_event_queue = []
         self._outbound_event_queue = []
         self._inbound_lock = threading.Lock()
@@ -81,7 +81,7 @@ class TwitchChatObserver(object):
             callback(*args, **kwargs)
 
     def get_events(self):
-        """Returns a sequence of events since the last time called
+        """Returns a sequence of events since the last time called.
         
         Returns: A sequence of TwitchChatEvents
         """
@@ -92,8 +92,9 @@ class TwitchChatObserver(object):
 
         return result
 
-    def send_events(self, *events):
-        """Queues up the given events for sending"""
+    def _send_events(self, *events):
+        """Queues up the given events for sending.
+        """
 
         with self._outbound_lock:
             for event in events:
@@ -106,22 +107,22 @@ class TwitchChatObserver(object):
         """Sends a message to a channel.
         """
 
-        self.send_events(TwitchChatEvent(channel, "PRIVMSG", message))
+        self._send_events(TwitchChatEvent(channel, "PRIVMSG", message))
 
     def join_channel(self, channel):
         """Joins a channel.
         """
 
-        self.send_events(TwitchChatEvent(channel, "JOIN"))
+        self._send_events(TwitchChatEvent(channel, "JOIN"))
 
     def leave_channel(self, channel):
         """Leaves a channel.
         """
         
-        self.send_events(TwitchChatEvent(channel, "PART"))
+        self._send_events(TwitchChatEvent(channel, "PART"))
 
     def start(self):
-        """Starts the observer
+        """Starts the observer.
 
         Attempt to connect to the Twitch channel with the given nickname and
         password. If successful a worker thread will be started to handle
@@ -174,9 +175,7 @@ class TwitchChatObserver(object):
                         event.command = cmd
 
                         if cmd == 'JOIN' or cmd == 'PART':
-                            if args.startswith("#"):
-                                args = args[1:]
-                            event.channel = args
+                            event.channel = args[1:]
 
                         elif cmd == 'PRIVMSG':
                             channel, message = message_pattern.match(args).groups()
@@ -188,7 +187,7 @@ class TwitchChatObserver(object):
                         with self._inbound_lock:
                             self._inbound_event_queue.append(event)
 
-                    time.sleep(self._inbound_polling_rate)
+                    time.sleep(1 / self._inbound_polling_rate)
 
                 except OSError:
                     # Forcing the socket to shutdown will result in this
@@ -209,7 +208,7 @@ class TwitchChatObserver(object):
 
             while self._is_running:
                 try:
-                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_rate:
+                    if self._outbound_event_queue and time.time() - self._last_time_sent > (1 / self._outbound_sending_rate):
                         with self._outbound_lock:
                             event = self._outbound_event_queue.pop(0)
 
@@ -218,7 +217,7 @@ class TwitchChatObserver(object):
 
                         self._last_time_sent = time.time()
 
-                    time.sleep(self._outbound_send_rate / 2)
+                    time.sleep(2 / self._outbound_sending_rate)
 
                 except OSError:
                     pass
@@ -230,7 +229,7 @@ class TwitchChatObserver(object):
         self._outbound_worker_thread.start()
 
     def stop(self, force_stop=False):
-        """Stops the observer
+        """Stops the observer.
 
         Stop watching the channel, shutdown the socket, and stop the worker
         threads once all of the outbound events have been sent.
@@ -242,7 +241,7 @@ class TwitchChatObserver(object):
 
         # Wait until all outbound events are sent
         while self._outbound_event_queue and not force_stop:
-            time.sleep(self._outbound_send_rate)
+            time.sleep(1 / self._outbound_sending_rate)
 
         self._is_running = False
 

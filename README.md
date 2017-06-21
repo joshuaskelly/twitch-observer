@@ -9,7 +9,7 @@ Turn Twitch chatter into Python events.
 ## Features
 
 - *Pure Python:* No extra dependencies. Just plain and simple Python.
-- *Small API:* With two classes and four methods, you can learn it over a coffee break.
+- *Small API:* With three classes and four methods, you can learn it over a coffee break.
 - *Event Based:* Makes writing apps easy and straightforward.
 - *Context Manager:* Further simplifies working with observers.
 
@@ -17,11 +17,18 @@ Turn Twitch chatter into Python events.
 
 ### 1. Installation
 
-To install twitch-observer clone from the [repo](https://github.com/JoshuaSkelly/twitch-observer) and use:
+To install twitch-observer clone from the [repo](https://github.com/JoshuaSkelly/twitch-observer) and run:
 
 ```
 $ pip install .
 ```
+
+You can also use the makefile by typing:
+
+```
+$ make
+```
+
 Directly installing from PyPI will be supported in the future.
 
 ### 2. Create an Observer
@@ -92,6 +99,21 @@ observer.join_channel('channel')
 
 ```python
 observer.leave_channel('channel')
+```
+
+### 5. Deinstallation
+
+To deinstall twitch-observer run:
+
+```
+$ pip uninstall twitchobserver
+```
+
+You can also use the makefile by typing:
+
+```
+$ make uninstall
+$ make clean
 ```
 
 ## Tests
