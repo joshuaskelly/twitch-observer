@@ -58,8 +58,8 @@ class TwitchChatObserver(object):
         self._outbound_worker_thread = None
         self._is_running = True
         self._socket = None
-        self._inbound_poll_intervall = 30 / 40
-        self._outbound_send_intervall = 30 / 20
+        self._inbound_poll_interval = 30 / 40
+        self._outbound_send_interval = 30 / 20
         self._inbound_event_queue = []
         self._outbound_event_queue = []
         self._inbound_lock = threading.Lock()
@@ -187,7 +187,7 @@ class TwitchChatObserver(object):
                         with self._inbound_lock:
                             self._inbound_event_queue.append(event)
 
-                    time.sleep(self._inbound_poll_intervall)
+                    time.sleep(self._inbound_poll_interval)
 
                 except OSError:
                     # Forcing the socket to shutdown will result in this
@@ -208,7 +208,7 @@ class TwitchChatObserver(object):
 
             while self._is_running:
                 try:
-                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_intervall:
+                    if self._outbound_event_queue and time.time() - self._last_time_sent > self._outbound_send_interval:
                         with self._outbound_lock:
                             event = self._outbound_event_queue.pop(0)
 
@@ -217,7 +217,7 @@ class TwitchChatObserver(object):
 
                         self._last_time_sent = time.time()
 
-                    time.sleep(self._outbound_send_intervall / 2)
+                    time.sleep(self._outbound_send_interval / 2)
 
                 except OSError:
                     pass
@@ -241,7 +241,7 @@ class TwitchChatObserver(object):
 
         # Wait until all outbound events are sent
         while self._outbound_event_queue and not force_stop:
-            time.sleep(self._outbound_send_intervall)
+            time.sleep(self._outbound_send_interval)
 
         self._is_running = False
 
