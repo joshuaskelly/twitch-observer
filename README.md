@@ -9,7 +9,7 @@ Turn Twitch chatter into Python events.
 ## Features
 
 - *Pure Python:* No extra dependencies. Just plain and simple Python.
-- *Small API:* With three classes and four methods, you can learn it over a coffee break.
+- *Small API:* With three classes and seven methods, you can learn it over a coffee break.
 - *Event Based:* Makes writing apps easy and straightforward.
 - *Context Manager:* Further simplifies working with observers.
 
