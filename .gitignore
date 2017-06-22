@@ -10,6 +10,7 @@
 # Ignore pyenv artifacts
 .python-version
 
-# Ignore compiled Python artifacts
+# Ignore Python artifacts
 *.pyc
 *.egg-info
+.cache
