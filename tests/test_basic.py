@@ -7,7 +7,7 @@ if sys.version_info[0] == 3:
 else:
     import mock
 
-from twitchobserver import TwitchChatObserver
+from twitchobserver import Observer
 
 SUCCESSFUL_LOGIN_MESSAGE = """:tmi.twitch.tv 001 nickname :Welcome, GLHF!\r
 :tmi.twitch.tv 002 nickname :Your host is tmi.twitch.tv\r
@@ -29,7 +29,7 @@ class B(unittest.TestCase):
         with mock.patch('socket.socket') as mock_socket:
             mock_socket.return_value.recv.return_value = SUCCESSFUL_LOGIN_MESSAGE
 
-            observer = TwitchChatObserver('nickname', 'password123', 'channel')
+            observer = Observer('nickname', 'password123', 'channel')
             observer.start()
 
             self.assertEqual(observer._nickname, 'nickname', 'Nickname should be set')
@@ -50,7 +50,7 @@ class B(unittest.TestCase):
             mock_socket.return_value.recv.return_value = UNSUCCESSFUL_LOGIN_MESSAGE
 
             with self.assertRaises(RuntimeError):
-                observer = TwitchChatObserver('nickname', 'password123', 'channel')
+                observer = Observer('nickname', 'password123', 'channel')
                 observer.start()
                 observer.stop(force_stop=True)
 
@@ -58,7 +58,7 @@ class B(unittest.TestCase):
         with mock.patch('socket.socket') as mock_socket:
             mock_socket.return_value.recv.side_effect = [SUCCESSFUL_LOGIN_MESSAGE, SERVER_PING_MESSAGE]
 
-            observer = TwitchChatObserver('nickname', 'password123', 'channel')
+            observer = Observer('nickname', 'password123', 'channel')
             observer.start()
             self.assertEqual(mock_socket.return_value.send.call_args[0][0], CLIENT_PONG_MESSAGE, 'Client should respond with PONG response')
             observer.stop(force_stop=True)

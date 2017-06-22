@@ -32,18 +32,18 @@ To get Twitch chat events, you create an Observer that monitors a given channel.
 *Note:* To get an OAuth token visit: http://twitchapps.com/tmi/
 
 ```python
-from twitchobserver import TwitchChatObserver
+from twitchobserver import Observer
 
-observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
+observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 ```
 
 ### 3. Get Events
 
-The TwitchChatObserver class has methods to handle events both synchronously and asynchronously.
+The Observer class has methods to handle events both synchronously and asynchronously.
 
 #### a. Synchronous
 
-The ```TwitchChatObserver.get_events()``` method returns a sequence of ```TwitchChatEvents``` for processing.
+The ```Observer.get_events()``` method returns a sequence of ```ChatEvents``` for processing.
 
 ```python
 observer.start()
@@ -61,7 +61,7 @@ observer.stop()
 
 #### b. Asynchronous
 
-The ```TwitchChatObserver.subscribe(callback)``` method takes a callback that is invoked when Twitch chat messages are recieved. 
+The ```Observer.subscribe(callback)``` method takes a callback that is invoked when Twitch chat messages are recieved. 
 
 ```python
  def event_handler(event):
@@ -75,7 +75,7 @@ The ```TwitchChatObserver.subscribe(callback)``` method takes a callback that is
 
 ### 4. Send Events
 
-```TwitchChatObserver``` provides three methods to make talking to Twitch super easy.
+```Observer``` provides three methods to make talking to Twitch super easy.
 
 #### Sending Messages
 
@@ -103,13 +103,13 @@ observer.leave_channel('channel')
 
 #### Polling for Events
 
-Whenever a viewer joins chat, print out a greeting. The ```TwitchChatObserver``` is created as a [context manager object](https://docs.python.org/3/reference/datamodel.html#context-managers) which will implicitly handle calling ```start()``` and ```stop()```.
+Whenever a viewer joins chat, print out a greeting. The ```Observer``` is created as a [context manager object](https://docs.python.org/3/reference/datamodel.html#context-managers) which will implicitly handle calling ```start()``` and ```stop()```.
 
 ```python
 import time
-from twitchobserver import TwitchChatObserver
+from twitchobserver import Observer
 
-with TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as observer:
+with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as observer:
     while True:
         try:
             for event in observer.get_events():
@@ -128,7 +128,7 @@ Allow viewers to cast either a ```!yes``` or ```!no``` vote and tally the result
 
 ```python
 import time
-from twitchobserver import TwitchChatObserver
+from twitchobserver import Observer
 
 votes = {}
 
@@ -143,7 +143,7 @@ def handle_event(event):
         votes[event.nickname] = -1
         
 
-observer = TwitchChatObserver('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
+observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
 observer.subscribe(handle_event)
 
 observer.send_message('Voting has started!', 'channel')
