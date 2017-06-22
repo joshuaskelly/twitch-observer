@@ -1,3 +1,4 @@
+import sys
 import re
 import socket
 import threading
@@ -78,7 +79,11 @@ class TwitchChatObserver(object):
 
     def _notify_subscribers(self, *args, **kwargs):
         for callback in self._subscribers:
-            callback(*args, **kwargs)
+            try:
+                callback(*args, **kwargs)
+            except:
+                error_type, error_value, error_traceback = sys.exc_info()
+                print("WARN: While calling _notify_subscribers an exception occured in the callback '{}': {}: {}".format(callback.__name__, error_type, error_value))
 
     def get_events(self):
         """Returns a sequence of events since the last time called.
