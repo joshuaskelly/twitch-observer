@@ -1,6 +1,7 @@
-import sys
+import os
 import re
 import socket
+import sys
 import threading
 import time
 import warnings
@@ -85,7 +86,13 @@ class TwitchChatObserver(object):
 
             except:
                 error_type, error_value, error_traceback = sys.exc_info()
-                warnings.warn(RuntimeWarning("Callback '{}' raised an error: {}: {}".format(callback.__name__, error_type.__name__, error_value)))
+
+                # Extract the backtrace if present
+                if error_traceback.tb_next:
+                    error_traceback = error_traceback.tb_next
+
+                filename = os.path.normpath(error_traceback.tb_frame.f_code.co_filename)
+                warnings.warn(RuntimeWarning("Callback '{}' raised an error:\n{}:{}: {}: {}".format(callback.__name__, filename, error_traceback.tb_lineno, error_type.__name__, error_value)))
 
     def get_events(self):
         """Returns a sequence of events since the last time called.
