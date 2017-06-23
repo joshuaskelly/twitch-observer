@@ -32,11 +32,11 @@ class TwitchChatEvent(object):
     def __init__(self, channel=None, command=None, message=''):
         self.type = 'TWITCHCHATEVENT'
         self.channel = channel
-        self.command = command
+        self._command = command
         self.message = message
 
     def dumps(self):
-        return '{} #{}{}\r\n'.format(self.command, self.channel, ' :' + self.message if self.message else self.message)
+        return '{} #{}{}\r\n'.format(self._command, self.channel, ' :' + self.message if self.message else self.message)
 
 
 class TwitchChatObserver(object):
@@ -182,7 +182,7 @@ class TwitchChatObserver(object):
                     for nick, cmd, args in [response_pattern.match(m).groups() for m in response.split('\r\n') if response_pattern.match(m)]:
                         event = TwitchChatEvent()
                         event.nickname = nick
-                        event.command = cmd
+                        event._command = cmd
 
                         if cmd == 'JOIN' or cmd == 'PART':
                             event.channel = args[1:]
