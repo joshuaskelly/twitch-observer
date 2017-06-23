@@ -82,6 +82,7 @@ class TwitchChatObserver(object):
         for callback in self._subscribers:
             try:
                 callback(*args, **kwargs)
+
             except:
                 error_type, error_value, error_traceback = sys.exc_info()
                 warnings.warn(RuntimeWarning("Callback '{}' raised an error: {}: {}".format(callback.__name__, error_type.__name__, error_value)))
@@ -99,8 +100,7 @@ class TwitchChatObserver(object):
         return result
 
     def _send_events(self, *events):
-        """Queues up the given events for sending.
-        """
+        """Queues up the given events for sending."""
 
         with self._outbound_lock:
             for event in events:
@@ -110,20 +110,17 @@ class TwitchChatObserver(object):
                 self._outbound_event_queue.append(event)
 
     def send_message(self, message, channel):
-        """Sends a message to a channel.
-        """
+        """Sends a message to a channel."""
 
         self._send_events(TwitchChatEvent(channel, "PRIVMSG", message))
 
     def join_channel(self, channel):
-        """Joins a channel.
-        """
+        """Joins a channel."""
 
         self._send_events(TwitchChatEvent(channel, "JOIN"))
 
     def leave_channel(self, channel):
-        """Leaves a channel.
-        """
+        """Leaves a channel."""
         
         self._send_events(TwitchChatEvent(channel, "PART"))
 
