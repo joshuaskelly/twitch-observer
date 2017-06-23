@@ -24,7 +24,7 @@ SERVER_PING_MESSAGE = """PING :tmi.twitch.tv\r\n""".encode('utf-8')
 CLIENT_PONG_MESSAGE = """PONG :tmi.twitch.tv\r\n""".encode('utf-8')
 
 
-class B(unittest.TestCase):
+class TestBasicFunctionality(unittest.TestCase):
     def test_connect(self):
         with mock.patch('socket.socket') as mock_socket:
             mock_socket.return_value.recv.return_value = SUCCESSFUL_LOGIN_MESSAGE
