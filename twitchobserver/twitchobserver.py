@@ -30,13 +30,44 @@ class TwitchChatEvent(object):
     """
 
     def __init__(self, channel=None, command=None, message=''):
-        self.type = 'TWITCHCHATEVENT'
+        command_to_type = {
+            'JOIN': 'TWITCHCHATJOIN',
+            'PART': 'TWITCHCHATLEAVE',
+            'PRIVMSG': 'TWITCHCHATMESSAGE',
+            'MODE': 'TWITCHCHATMODE'
+        }
+
+        if command in command_to_type:
+            self.type = command_to_type[command]
+
+        elif command:
+            self.type = command.upper()
+
+        else:
+            self.type = 'TWITCHCHATUNKNOWN'
+
         self.channel = channel
         self._command = command
-        self.message = message
+
+        if message:
+            self.message = message
 
     def dumps(self):
-        return '{} #{}{}\r\n'.format(self._command, self.channel, ' :' + self.message if self.message else self.message)
+        message = getattr(self, 'message', '')
+        if message:
+            message = ' :' + message
+
+        return '{} #{}{}\r\n'.format(self._command, self.channel, message)
+
+
+# Server messages. Groups: (nickname_or_servername, command, parameters)
+_sever_message_re = re.compile(':(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
+
+# PRIVMSG Parameters. Groups: (channel, message)
+_privmsg_params_re = re.compile('#(\w+) :([\s\S]*)')
+
+# MODE parameters. Groups: (channel, mode, nickname)
+_mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
 
 
 class TwitchChatObserver(object):
@@ -119,17 +150,17 @@ class TwitchChatObserver(object):
     def send_message(self, message, channel):
         """Sends a message to a channel."""
 
-        self._send_events(TwitchChatEvent(channel, "PRIVMSG", message))
+        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
 
     def join_channel(self, channel):
         """Joins a channel."""
 
-        self._send_events(TwitchChatEvent(channel, "JOIN"))
+        self._send_events(TwitchChatEvent(channel, 'JOIN'))
 
     def leave_channel(self, channel):
         """Leaves a channel."""
         
-        self._send_events(TwitchChatEvent(channel, "PART"))
+        self._send_events(TwitchChatEvent(channel, 'PART'))
 
     def start(self):
         """Starts the observer.
@@ -148,25 +179,23 @@ class TwitchChatObserver(object):
         self._socket.send('PASS {}\r\n'.format(self._password).encode('utf-8'))
         self._socket.send('NICK {}\r\n'.format(self._nickname).encode('utf-8'))
 
+        # Request Twitch-Specific Capabilities
+        self._socket.send('CAP REQ :twitch.tv/membership\r\n'.encode('utf-8'))
+
         if self._channel:
             self.join_channel(self._channel)
 
-        # Check to see if authentication failed
         response = self._socket.recv(1024).decode('utf-8')
-
         self._socket.settimeout(0.25)
 
-        if response == ':tmi.twitch.tv NOTICE * :Login authentication failed\r\n':
-            self.stop(force_stop=True)
-            raise RuntimeError('Login authentication failed')
+        # Handle the initial sequence of responses on main thread to raise if
+        # authentication fails
+        self._process_server_messages(response)
 
         def inbound_worker():
             """Worker thread function that handles the incoming messages from
             Twitch IRC.
             """
-
-            response_pattern = re.compile(':(\w*)!\w*@\w*.tmi.twitch.tv ([A-Z]*) ([\s\S]*)')
-            message_pattern = re.compile('(#[\w]+) :([\s\S]*)')
 
             # Handle socket responses
             while self._is_running:
@@ -174,29 +203,7 @@ class TwitchChatObserver(object):
                     with self._socket_lock:
                         response = self._socket.recv(1024).decode('utf-8')
 
-                    # Confirm that we are still listening
-                    if response == 'PING :tmi.twitch.tv\r\n':
-                        with self._socket_lock:
-                            self._socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
-
-                    for nick, cmd, args in [response_pattern.match(m).groups() for m in response.split('\r\n') if response_pattern.match(m)]:
-                        event = TwitchChatEvent()
-                        event.nickname = nick
-                        event._command = cmd
-
-                        if cmd == 'JOIN' or cmd == 'PART':
-                            event.channel = args[1:]
-
-                        elif cmd == 'PRIVMSG':
-                            channel, message = message_pattern.match(args).groups()
-                            event.channel = channel[1:]
-                            event.message = message
-
-                        self._notify_subscribers(event)
-
-                        with self._inbound_lock:
-                            self._inbound_event_queue.append(event)
-
+                    self._process_server_messages(response)
                     time.sleep(self._inbound_poll_interval)
 
                 except OSError:
@@ -276,6 +283,46 @@ class TwitchChatObserver(object):
             worker = self._outbound_worker_thread
             self._outbound_worker_thread = None
             worker.join()
+
+    def _process_server_messages(self, response):
+        for message in response.split('\r\n'):
+            # Confirm that we are still listening
+            if message == 'PING :tmi.twitch.tv':
+                with self._socket_lock:
+                    self._socket.send('PONG :tmi.twitch.tv\r\n'.encode('utf-8'))
+
+            # Raise if authentication fails
+            elif message == ':tmi.twitch.tv NOTICE * :Login authentication failed':
+                self.stop(force_stop=True)
+                raise RuntimeError('Login authentication failed')
+
+            # Handle sever messages
+            match = _sever_message_re.match(message)
+            if match:
+                nick, cmd, args = match.groups()
+                event = TwitchChatEvent(command=cmd)
+                event.nickname = nick
+                event._command = cmd
+
+                if cmd in ('JOIN', 'PART'):
+                    event.channel = args[1:]
+
+                elif cmd == 'PRIVMSG':
+                    channel, message = _privmsg_params_re.match(args).groups()
+                    event.channel = channel
+                    event.message = message
+
+                elif cmd == 'MODE':
+                    print(args)
+                    channel, mode, nick = _mode_params_re.match(args).groups()
+                    event.channel = channel
+                    event.mode = mode
+                    event.nickname = nick
+
+                self._notify_subscribers(event)
+
+                with self._inbound_lock:
+                    self._inbound_event_queue.append(event)
 
     def __enter__(self):
         self.start()
