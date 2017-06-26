@@ -27,6 +27,8 @@ class TwitchChatEvent(object):
             - PRIVMSG
             
         message: The message sent by the user.
+
+        recipient: The recipient of the message (if TWITCHCHATWHISPER).
     """
 
     def __init__(self, channel=None, command=None, message=''):
@@ -74,6 +76,9 @@ _sever_message_re = re.compile(':(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.
 
 # PRIVMSG Parameters. Groups: (channel, message)
 _privmsg_params_re = re.compile('#(\w+) :([\s\S]*)')
+
+# WHISPER parameters. Groups: (recipient, message)
+_whisper_params_re = re.compile('(\w+)\s+:([\s\S]*)')
 
 # MODE parameters. Groups: (channel, mode, nickname)
 _mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
@@ -170,6 +175,11 @@ class TwitchChatObserver(object):
         """Leaves a channel."""
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
+
+    def whisper(self, user, message):
+        """Sends a whisper (private message) to a user."""
+        
+        self.send_message("/w " + user + " " + message, channel=None)
 
     def start(self):
         """Starts the observer.
@@ -324,7 +334,9 @@ class TwitchChatObserver(object):
                     event.message = message
 
                 elif cmd == "WHISPER":
-                    pass
+                    recipient, message = _whisper_params_re.match(args).groups()
+                    event.recipient = recipient
+                    event.message = message
 
                 elif cmd == 'MODE':
                     print(args)
