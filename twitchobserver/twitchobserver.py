@@ -212,6 +212,7 @@ class TwitchChatObserver(object):
                 try:
                     with self._socket_lock:
                         response = self._socket.recv(1024).decode('utf-8')
+                        #print("RESPONSE\n{}".format(response))
 
                     self._process_server_messages(response)
                     time.sleep(self._inbound_poll_interval)
@@ -321,6 +322,9 @@ class TwitchChatObserver(object):
                     channel, message = _privmsg_params_re.match(args).groups()
                     event.channel = channel
                     event.message = message
+
+                elif cmd == "WHISPER":
+                    pass
 
                 elif cmd == 'MODE':
                     print(args)
