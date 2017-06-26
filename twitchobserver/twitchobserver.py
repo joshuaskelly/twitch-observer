@@ -25,14 +25,6 @@ class TwitchChatEvent(object):
             - JOIN
             - PART
             - PRIVMSG
-            - CLEARCHAT
-            - HOSTTARGET
-            - NOTICE
-            - RECONNECT
-            - ROOMSTATE
-            - USERNOTICE
-            - USERSTATE
-            - WHISPER
             
         message: The message sent by the user.
     """
@@ -43,14 +35,14 @@ class TwitchChatEvent(object):
             'PART': 'TWITCHCHATLEAVE',
             'PRIVMSG': 'TWITCHCHATMESSAGE',
             'MODE': 'TWITCHCHATMODE',
-            'CLEARCHAT': 'TWITCHCHATCLEARCHAT',
+            'CLEARCHAT': 'TWITCHCHATCLEARCHAT', # /ban
             'HOSTTARGET': 'TWITCHCHATHOSTTARGET',
             'NOTICE': 'TWITCHCHATNOTICE',
             'RECONNECT': 'TWITCHCHATRECONNECT',
             'ROOMSTATE': 'TWITCHCHATROOMSTATE',
             'USERNOTICE': 'TWITCHCHATUSERNOTICE',
             'USERSTATE': 'TWITCHCHATUSERSTATE',
-            'WHISPER': 'TWITCHCHATWHISPER'
+            'WHISPER': 'TWITCHCHATWHISPER' # /w
         }
 
         if command in command_to_type:
@@ -72,11 +64,7 @@ class TwitchChatEvent(object):
         message = getattr(self, 'message', '')
 
         if message:
-            if self.type == "TWITCHCHATHOSTTARGET":
-                if self.message[0] != "-":
-                    message = " " + message
-            else:
-                message = ' :' + message
+            message = ' :' + message
 
         return '{} #{}{}\r\n'.format(self._command, self.channel, message)
 
@@ -182,11 +170,6 @@ class TwitchChatObserver(object):
         """Leaves a channel."""
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
-
-    def clear_chat(self, channel, user=None):
-        """Temporary or permanent ban on a channel."""
-
-        self._send_events(TwitchChatEvent(channel, "CLEARCHAT", user))
 
     def start(self):
         """Starts the observer.
@@ -331,10 +314,10 @@ class TwitchChatObserver(object):
                 event.nickname = nick
                 event._command = cmd
 
-                if cmd in ('JOIN', 'PART'):
+                if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
                     event.channel = args[1:]
 
-                elif cmd == 'PRIVMSG':
+                elif cmd in ('PRIVMSG', 'HOSTTARGET', 'NOTICE', 'USERNOTICE'):
                     channel, message = _privmsg_params_re.match(args).groups()
                     event.channel = channel
                     event.message = message
