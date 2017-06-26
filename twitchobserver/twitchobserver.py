@@ -178,8 +178,13 @@ class TwitchChatObserver(object):
 
     def whisper(self, user, message):
         """Sends a whisper (private message) to a user."""
-        
-        self.send_message("/w " + user + " " + message, channel=None)
+
+        self.send_message("/w " + user + " " + message, None)
+
+    def list_moderators(self, channel):
+        """Lists all moderators of a given channel."""
+
+        self.send_message("/mods", channel)
 
     def start(self):
         """Starts the observer.
