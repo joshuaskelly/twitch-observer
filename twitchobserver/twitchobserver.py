@@ -73,7 +73,7 @@ class TwitchChatEvent(object):
 
         if message:
             if self.type == "TWITCHCHATHOSTTARGET":
-                self.message[0] != "-":
+                if self.message[0] != "-":
                     message = " " + message
             else:
                 message = ' :' + message
