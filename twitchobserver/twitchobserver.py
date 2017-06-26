@@ -207,6 +207,7 @@ class TwitchChatObserver(object):
 
         # Request Twitch-Specific Capabilities
         self._socket.send('CAP REQ :twitch.tv/membership\r\n'.encode('utf-8'))
+        self._socket.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
 
         if self._channel:
             self.join_channel(self._channel)
