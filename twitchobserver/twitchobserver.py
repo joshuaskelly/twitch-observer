@@ -32,6 +32,7 @@ class TwitchChatEvent(object):
             - ROOMSTATE
             - USERNOTICE
             - USERSTATE
+            - WHISPER
             
         message: The message sent by the user.
     """
@@ -48,7 +49,8 @@ class TwitchChatEvent(object):
             'RECONNECT': 'TWITCHCHATRECONNECT',
             'ROOMSTATE': 'TWITCHCHATROOMSTATE',
             'USERNOTICE': 'TWITCHCHATUSERNOTICE',
-            'USERSTATE': 'TWITCHCHATUSERSTATE'
+            'USERSTATE': 'TWITCHCHATUSERSTATE',
+            'WHISPER': 'TWITCHCHATWHISPER'
         }
 
         if command in command_to_type:
