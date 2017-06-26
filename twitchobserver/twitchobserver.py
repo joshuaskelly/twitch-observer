@@ -25,6 +25,13 @@ class TwitchChatEvent(object):
             - JOIN
             - PART
             - PRIVMSG
+            - CLEARCHAT
+            - HOSTTARGET
+            - NOTICE
+            - RECONNECT
+            - ROOMSTATE
+            - USERNOTICE
+            - USERSTATE
             
         message: The message sent by the user.
     """
@@ -34,7 +41,14 @@ class TwitchChatEvent(object):
             'JOIN': 'TWITCHCHATJOIN',
             'PART': 'TWITCHCHATLEAVE',
             'PRIVMSG': 'TWITCHCHATMESSAGE',
-            'MODE': 'TWITCHCHATMODE'
+            'MODE': 'TWITCHCHATMODE',
+            'CLEARCHAT': 'TWITCHCHATCLEARCHAT',
+            'HOSTTARGET': 'TWITCHCHATHOSTTARGET',
+            'NOTICE': 'TWITCHCHATNOTICE',
+            'RECONNECT': 'TWITCHCHATRECONNECT',
+            'ROOMSTATE': 'TWITCHCHATROOMSTATE',
+            'USERNOTICE': 'TWITCHCHATUSERNOTICE',
+            'USERSTATE': 'TWITCHCHATUSERSTATE'
         }
 
         if command in command_to_type:
@@ -54,8 +68,13 @@ class TwitchChatEvent(object):
 
     def dumps(self):
         message = getattr(self, 'message', '')
+
         if message:
-            message = ' :' + message
+            if self.type == "TWITCHCHATHOSTTARGET":
+                self.message[0] != "-":
+                    message = " " + message
+            else:
+                message = ' :' + message
 
         return '{} #{}{}\r\n'.format(self._command, self.channel, message)
 
@@ -161,6 +180,11 @@ class TwitchChatObserver(object):
         """Leaves a channel."""
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
+
+    def clear_chat(self, channel, user=None):
+        """Temporary or permanent ban on a channel."""
+
+        self._send_events(TwitchChatEvent(channel, "CLEARCHAT", user))
 
     def start(self):
         """Starts the observer.
