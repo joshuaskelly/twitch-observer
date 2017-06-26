@@ -186,6 +186,21 @@ class TwitchChatObserver(object):
 
         self.send_message("/mods", channel)
 
+    def ban_user(self, user, channel):
+        """Bans a user from a channel."""
+
+        self.send_message("/ban " + user, channel)
+
+    def unban_user(self, user, channel):
+        """Unbans a user from a channel."""
+
+        self.send_message("/unban " + user, channel)
+
+    def clear_chat_history(self, channel):
+        """Clears the chat history of a channel."""
+
+        self.send_message("/clear", channel)
+
     def start(self):
         """Starts the observer.
 
