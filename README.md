@@ -147,7 +147,7 @@ with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as obse
     while True:
         try:
             for event in observer.get_events():
-                if event.command == 'JOIN':
+                if event.type == 'TWITCHCHATJOIN':
                     observer.send_message('Greetings {}!'.format(event.nickname), 'channel')
 
             time.sleep(1)
@@ -167,7 +167,7 @@ from twitchobserver import Observer
 votes = {}
 
 def handle_event(event):
-    if event.command != 'PRIVMSG':
+    if event.type != 'TWITCHCHATPRIVMSG':
         return
         
     if event.message[0:2].upper() == '!Y':
