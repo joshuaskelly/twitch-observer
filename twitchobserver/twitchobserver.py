@@ -34,7 +34,15 @@ class TwitchChatEvent(object):
             'JOIN': 'TWITCHCHATJOIN',
             'PART': 'TWITCHCHATLEAVE',
             'PRIVMSG': 'TWITCHCHATMESSAGE',
-            'MODE': 'TWITCHCHATMODE'
+            'MODE': 'TWITCHCHATMODE',
+            'CLEARCHAT': 'TWITCHCHATCLEARCHAT',
+            'HOSTTARGET': 'TWITCHCHATHOSTTARGET',
+            'NOTICE': 'TWITCHCHATNOTICE',
+            'RECONNECT': 'TWITCHCHATRECONNECT',
+            'ROOMSTATE': 'TWITCHCHATROOMSTATE',
+            'USERNOTICE': 'TWITCHCHATUSERNOTICE',
+            'USERSTATE': 'TWITCHCHATUSERSTATE',
+            'WHISPER': 'TWITCHCHATWHISPER'
         }
 
         if command in command_to_type:
@@ -54,6 +62,7 @@ class TwitchChatEvent(object):
 
     def dumps(self):
         message = getattr(self, 'message', '')
+
         if message:
             message = ' :' + message
 
@@ -65,6 +74,9 @@ _sever_message_re = re.compile(':(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.
 
 # PRIVMSG Parameters. Groups: (channel, message)
 _privmsg_params_re = re.compile('#(\w+) :([\s\S]*)')
+
+# WHISPER parameters. Groups: (recipient, message)
+_whisper_params_re = re.compile('(\w+)\s+:([\s\S]*)')
 
 # MODE parameters. Groups: (channel, mode, nickname)
 _mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
@@ -162,6 +174,31 @@ class TwitchChatObserver(object):
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
 
+    def send_whisper(self, user, message):
+        """Sends a whisper (private message) to a user."""
+
+        self.send_message("/w {} {}".format(user, message), None)
+
+    def list_moderators(self, channel):
+        """Lists all moderators of a given channel."""
+
+        self.send_message("/mods", channel)
+
+    def ban_user(self, user, channel):
+        """Bans a user from a channel."""
+
+        self.send_message("/ban {}".format(user), channel)
+
+    def unban_user(self, user, channel):
+        """Unbans a user from a channel."""
+
+        self.send_message("/unban {}".format(user), channel)
+
+    def clear_chat_history(self, channel):
+        """Clears the chat history of a channel."""
+
+        self.send_message("/clear", channel)
+
     def start(self):
         """Starts the observer.
 
@@ -181,6 +218,7 @@ class TwitchChatObserver(object):
 
         # Request Twitch-Specific Capabilities
         self._socket.send('CAP REQ :twitch.tv/membership\r\n'.encode('utf-8'))
+        self._socket.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
 
         if self._channel:
             self.join_channel(self._channel)
@@ -304,16 +342,19 @@ class TwitchChatObserver(object):
                 event.nickname = nick
                 event._command = cmd
 
-                if cmd in ('JOIN', 'PART'):
+                if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
                     event.channel = args[1:]
 
-                elif cmd == 'PRIVMSG':
+                elif cmd in ('PRIVMSG', 'HOSTTARGET', 'NOTICE', 'USERNOTICE'):
                     channel, message = _privmsg_params_re.match(args).groups()
                     event.channel = channel
                     event.message = message
 
+                elif cmd == "WHISPER":
+                    _, message = _whisper_params_re.match(args).groups()
+                    event.message = message
+
                 elif cmd == 'MODE':
-                    print(args)
                     channel, mode, nick = _mode_params_re.match(args).groups()
                     event.channel = channel
                     event.mode = mode

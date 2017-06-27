@@ -9,7 +9,7 @@ Turn Twitch chatter into Python events.
 ## Features
 
 - *Pure Python:* No extra dependencies. Just plain and simple Python.
-- *Small API:* With three classes and seven methods, you can learn it over a coffee break.
+- *Small API:* With three classes and twelve methods, you can learn it over a coffee break.
 - *Event Based:* Makes writing apps easy and straightforward.
 - *Context Manager:* Further simplifies working with observers.
 
@@ -75,7 +75,9 @@ The ```Observer.subscribe(callback)``` method takes a callback that is invoked w
 
 ### 4. Send Events
 
-```Observer``` provides three methods to make talking to Twitch super easy.
+```Observer``` provides several methods to make talking to Twitch super easy.
+
+#### a. Basic Events
 
 #### Sending Messages
 
@@ -93,6 +95,38 @@ observer.join_channel('channel')
 
 ```python
 observer.leave_channel('channel')
+```
+
+#### b. Advanced Events
+
+#### Sending a Whisper
+
+```python
+observer.send_whisper('user', message')
+```
+
+#### Listing All Moderators of a Channel
+
+```python
+observer.list_moderators('channel')
+```
+
+#### Baning a User From a Channel
+
+```python
+observer.ban_user('user', 'channel')
+```
+
+#### Unbaning a User From a Channel
+
+```python
+observer.unban_user('user', 'channel')
+```
+
+#### Clearing a Channels History
+
+```python
+observer.clear_chat_history('channel')
 ```
 
 ## Tests
@@ -113,7 +147,7 @@ with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as obse
     while True:
         try:
             for event in observer.get_events():
-                if event.command == 'JOIN':
+                if event.type == 'TWITCHCHATJOIN':
                     observer.send_message('Greetings {}!'.format(event.nickname), 'channel')
 
             time.sleep(1)
@@ -133,7 +167,7 @@ from twitchobserver import Observer
 votes = {}
 
 def handle_event(event):
-    if event.command != 'PRIVMSG':
+    if event.type != 'TWITCHCHATPRIVMSG':
         return
         
     if event.message[0:2].upper() == '!Y':
