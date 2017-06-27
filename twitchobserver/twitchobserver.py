@@ -27,8 +27,6 @@ class TwitchChatEvent(object):
             - PRIVMSG
             
         message: The message sent by the user.
-
-        recipient: The recipient of the message (if TWITCHCHATWHISPER).
     """
 
     def __init__(self, channel=None, command=None, message=''):
@@ -37,14 +35,14 @@ class TwitchChatEvent(object):
             'PART': 'TWITCHCHATLEAVE',
             'PRIVMSG': 'TWITCHCHATMESSAGE',
             'MODE': 'TWITCHCHATMODE',
-            'CLEARCHAT': 'TWITCHCHATCLEARCHAT', # /ban
+            'CLEARCHAT': 'TWITCHCHATCLEARCHAT',
             'HOSTTARGET': 'TWITCHCHATHOSTTARGET',
             'NOTICE': 'TWITCHCHATNOTICE',
             'RECONNECT': 'TWITCHCHATRECONNECT',
             'ROOMSTATE': 'TWITCHCHATROOMSTATE',
             'USERNOTICE': 'TWITCHCHATUSERNOTICE',
             'USERSTATE': 'TWITCHCHATUSERSTATE',
-            'WHISPER': 'TWITCHCHATWHISPER' # /w
+            'WHISPER': 'TWITCHCHATWHISPER'
         }
 
         if command in command_to_type:
@@ -176,10 +174,10 @@ class TwitchChatObserver(object):
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
 
-    def whisper(self, user, message):
+    def send_whisper(self, user, message):
         """Sends a whisper (private message) to a user."""
 
-        self.send_message("/w " + user + " " + message, None)
+        self.send_message("/w {} {}".format(user, message), None)
 
     def list_moderators(self, channel):
         """Lists all moderators of a given channel."""
@@ -189,12 +187,12 @@ class TwitchChatObserver(object):
     def ban_user(self, user, channel):
         """Bans a user from a channel."""
 
-        self.send_message("/ban " + user, channel)
+        self.send_message("/ban {}".format(user), channel)
 
     def unban_user(self, user, channel):
         """Unbans a user from a channel."""
 
-        self.send_message("/unban " + user, channel)
+        self.send_message("/unban {}".format(user), channel)
 
     def clear_chat_history(self, channel):
         """Clears the chat history of a channel."""
@@ -354,12 +352,10 @@ class TwitchChatObserver(object):
                     event.message = message
 
                 elif cmd == "WHISPER":
-                    recipient, message = _whisper_params_re.match(args).groups()
-                    event.recipient = recipient
+                    _, message = _whisper_params_re.match(args).groups()
                     event.message = message
 
                 elif cmd == 'MODE':
-                    print(args)
                     channel, mode, nick = _mode_params_re.match(args).groups()
                     event.channel = channel
                     event.mode = mode
