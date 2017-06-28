@@ -34,7 +34,7 @@ To get Twitch chat events, you create an Observer that monitors a given channel.
 ```python
 from twitchobserver import Observer
 
-observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
+observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123')
 ```
 
 ### 3. Get Events
@@ -47,6 +47,7 @@ The ```Observer.get_events()``` method returns a sequence of ```ChatEvents``` fo
 
 ```python
 observer.start()
+observer.join_channel('channel')
 
 while True:
     try:
@@ -56,6 +57,7 @@ while True:
     except KeyboardInterrupt:
         break
 
+observer.leave_channel('channel')
 observer.stop()
 ```
 
@@ -69,7 +71,11 @@ The ```Observer.subscribe(callback)``` method takes a callback that is invoked w
      
  observer.subscribe(event_handler)
  observer.start()
+ observer.join_channel('channel')
+
  # Wait a while
+
+ observer.leave_channel('channel')
  observer.stop()
 ```
 
@@ -143,7 +149,9 @@ Whenever a viewer joins chat, print out a greeting. The ```Observer``` is create
 import time
 from twitchobserver import Observer
 
-with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as observer:
+with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123') as observer:
+    observer.join_channel('channel')
+
     while True:
         try:
             for event in observer.get_events():
@@ -153,6 +161,7 @@ with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel') as obse
             time.sleep(1)
 
         except KeyboardInterrupt:
+            observer.leave_channel('channel')
             break
 ```
 
@@ -177,15 +186,20 @@ def handle_event(event):
         votes[event.nickname] = -1
         
 
-observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123', 'channel')
+observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123')
 observer.subscribe(handle_event)
 
 observer.send_message('Voting has started!', 'channel')
 
 observer.start()
+observer.join_channel('channel')
 time.sleep(60)
+observer.leave_channel('channel')
 observer.stop()
 
+observer = Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123')
+observer.start()
+observer.join_channel('channel')
 observer.send_message('Voting is over!', 'channel')
 
 time.sleep(2)
@@ -199,6 +213,9 @@ elif tally < 0:
 
 else:
     observer.send_message('Its a draw!', 'channel')
+
+observer.leave_channel('channel')
+observer.stop()
 ```
 
 ## Contributors
