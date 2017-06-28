@@ -29,12 +29,12 @@ class TestBasicFunctionality(unittest.TestCase):
         with mock.patch('socket.socket') as mock_socket:
             mock_socket.return_value.recv.return_value = SUCCESSFUL_LOGIN_MESSAGE
 
-            observer = Observer('nickname', 'password123', 'channel')
+            observer = Observer('nickname', 'password123')
             observer.start()
+            observer.join_channel('channel')
 
             self.assertEqual(observer._nickname, 'nickname', 'Nickname should be set')
             self.assertEqual(observer._password, 'password123', 'Password should be set')
-            self.assertEqual(observer._channel, 'channel', 'Channel should be set')
             self.assertIsNotNone(observer._inbound_worker_thread, 'Inbound worker thread should be running')
             self.assertIsNotNone(observer._outbound_worker_thread, 'Outbound worker thread should be running')
             self.assertTrue(observer._is_running, 'The observer should be running')
@@ -50,16 +50,18 @@ class TestBasicFunctionality(unittest.TestCase):
             mock_socket.return_value.recv.return_value = UNSUCCESSFUL_LOGIN_MESSAGE
 
             with self.assertRaises(RuntimeError):
-                observer = Observer('nickname', 'password123', 'channel')
+                observer = Observer('nickname', 'password123')
                 observer.start()
+                observer.join_channel('channel')
                 observer.stop(force_stop=True)
 
     def test_server_ping(self):
         with mock.patch('socket.socket') as mock_socket:
             mock_socket.return_value.recv.side_effect = [SUCCESSFUL_LOGIN_MESSAGE, SERVER_PING_MESSAGE]
 
-            observer = Observer('nickname', 'password123', 'channel')
+            observer = Observer('nickname', 'password123')
             observer.start()
+            observer.join_channel('channel')
             self.assertEqual(mock_socket.return_value.send.call_args[0][0], CLIENT_PONG_MESSAGE, 'Client should respond with PONG response')
             observer.stop(force_stop=True)
 
