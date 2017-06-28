@@ -338,6 +338,7 @@ class TwitchChatObserver(object):
                 event = TwitchChatEvent(command=cmd)
                 event.nickname = nick
                 event._command = cmd
+                event._params = params
 
                 if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
                     event.channel = params[1:]
