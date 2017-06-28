@@ -48,11 +48,8 @@ class TwitchChatEvent(object):
         if command in command_to_type:
             self.type = command_to_type[command]
 
-        elif command:
-            self.type = command.upper()
-
         else:
-            self.type = 'TWITCHCHATUNKNOWN'
+            self.type = 'TWITCHCHATCOMMAND'
 
         self.channel = channel
         self._command = command
@@ -343,6 +340,7 @@ class TwitchChatObserver(object):
                 event = TwitchChatEvent(command=cmd)
                 event.nickname = nick
                 event._command = cmd
+                event._params = params
 
                 if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
                     event.channel = params[1:]
