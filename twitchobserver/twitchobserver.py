@@ -122,6 +122,12 @@ class TwitchChatObserver(object):
 
         self._subscribers.append(callback)
 
+    def unsubscribe(self, callback):
+        """Unsubscribe a callback from the observer."""
+
+        if callback in self._subscribers:
+            self._subscribers.remove(callback)
+
     def _notify_subscribers(self, *args, **kwargs):
         for callback in self._subscribers:
             try:
