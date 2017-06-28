@@ -337,28 +337,46 @@ class TwitchChatObserver(object):
             # Handle sever messages
             match = _sever_message_re.match(message)
             if match:
-                nick, cmd, args = match.groups()
+                nick, cmd, params = match.groups()
                 event = TwitchChatEvent(command=cmd)
                 event.nickname = nick
                 event._command = cmd
 
                 if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
-                    event.channel = args[1:]
+                    event.channel = params[1:]
 
                 elif cmd in ('PRIVMSG', 'HOSTTARGET', 'NOTICE', 'USERNOTICE'):
-                    channel, message = _privmsg_params_re.match(args).groups()
-                    event.channel = channel
-                    event.message = message
+                    params_match = _privmsg_params_re.match(params)
+
+                    if params_match:
+                        channel, message = _privmsg_params_re.match(params).groups()
+                        event.channel = channel
+                        event.message = message
+
+                    else:
+                        warnings.warn(RuntimeWarning('Failed to process {} message: {}'.format(cmd, message)))
 
                 elif cmd == "WHISPER":
-                    _, message = _whisper_params_re.match(args).groups()
-                    event.message = message
+                    params_match = _whisper_params_re.match(params)
+
+                    if params_match:
+                        _, message = _whisper_params_re.match(params).groups()
+                        event.message = message
+
+                    else:
+                        warnings.warn(RuntimeWarning('Failed to process {} message: {}'.format(cmd, message)))
 
                 elif cmd == 'MODE':
-                    channel, mode, nick = _mode_params_re.match(args).groups()
-                    event.channel = channel
-                    event.mode = mode
-                    event.nickname = nick
+                    params_match = _mode_params_re.match(params)
+
+                    if params_match:
+                        channel, mode, nick = _mode_params_re.match(params).groups()
+                        event.channel = channel
+                        event.mode = mode
+                        event.nickname = nick
+
+                    else:
+                        warnings.warn(RuntimeWarning('Failed to process {} message: {}'.format(cmd, message)))
 
                 self._notify_subscribers(event)
 
