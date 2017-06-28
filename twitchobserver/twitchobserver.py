@@ -95,10 +95,9 @@ class TwitchChatObserver(object):
             is typically the user's nickname.
     """
 
-    def __init__(self, nickname, password, channel=None):
+    def __init__(self, nickname, password):
         self._nickname = nickname
         self._password = password
-        self._channel = channel
         self._subscribers = []
         self._inbound_worker_thread = None
         self._outbound_worker_thread = None
@@ -219,9 +218,6 @@ class TwitchChatObserver(object):
         # Request Twitch-Specific Capabilities
         self._socket.send('CAP REQ :twitch.tv/membership\r\n'.encode('utf-8'))
         self._socket.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
-
-        if self._channel:
-            self.join_channel(self._channel)
 
         response = self._socket.recv(1024).decode('utf-8')
         self._socket.settimeout(0.25)
