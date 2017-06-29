@@ -240,7 +240,13 @@ class TwitchChatObserver(object):
             while self._is_running:
                 try:
                     with self._socket_lock:
-                        response, truncated_response = (truncated_response + self._socket.recv(1024).decode('utf-8')).rsplit('\r\n', 1)
+                        response = truncated_response + self._socket.recv(1024).decode('utf-8')
+
+                        if '\r\n' in response:
+                            response, truncated_response = response.rsplit('\r\n', 1)
+
+                        else:
+                            response, truncated_response = '', response
 
                     self._process_server_messages(response)
                     time.sleep(self._inbound_poll_interval)

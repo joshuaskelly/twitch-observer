@@ -202,6 +202,27 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_WHISPER_MESSAGE, 'Observer should respond with PRIVMSG response')
 
+    def test_truncated_messages(self):
+        # Bit of a hack. Because the main thread handles consuming the first
+        # server response, we need to first supply a dummy message that gets
+        # ignored.
+        self.mock_socket.return_value.recv.side_effect = [''.encode('utf-8'), SERVER_PRIVMSG_MESSAGE[:18], SERVER_PRIVMSG_MESSAGE[18:]]
+
+        callback_invoked = False
+
+        def verify_event(event):
+            nonlocal callback_invoked
+            callback_invoked = True
+
+            self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
+            self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
+            self.assertEqual(event.message, 'message', "Message should be 'message'")
+            self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
+
+        self.observer.subscribe(verify_event)
+        self.observer.start()
+        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+
 
 if __name__ == '__main__':
     unittest.main()
