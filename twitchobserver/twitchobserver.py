@@ -161,10 +161,10 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
-    def send_message(self, message, channel):
+    def send_message(self, message, channel, use_color=False):
         """Sends a message to a channel."""
 
-        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
+        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', "/me {}".format(message) if use_color else message))
 
     def join_channel(self, channel):
         """Joins a channel."""
