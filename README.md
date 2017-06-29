@@ -137,7 +137,17 @@ observer.clear_chat_history('channel')
 
 ## Tests
 
-```python -m unittest discover -s tests```
+```$ python -m unittest discover -s tests```
+
+## Build the Docs
+
+Navigate to `docs` and run either
+
+```$ make html```
+
+or
+
+```$ make latexpdf```
 
 ## Examples
 
@@ -194,7 +204,7 @@ observer.send_message('Voting has started!', 'channel')
 observer.start()
 observer.join_channel('channel')
 time.sleep(60)
-observer.unsubscribe('channel')
+observer.unsubscribe(handle_event)
 
 observer.send_message('Voting is over!', 'channel')
 
