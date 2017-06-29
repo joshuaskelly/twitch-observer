@@ -234,11 +234,13 @@ class TwitchChatObserver(object):
             Twitch IRC.
             """
 
+            truncated_response = ''
+
             # Handle socket responses
             while self._is_running:
                 try:
                     with self._socket_lock:
-                        response = self._socket.recv(1024).decode('utf-8')
+                        response, truncated_response = (truncated_response + self._socket.recv(1024).decode('utf-8')).rsplit('\r\n', 1)
 
                     self._process_server_messages(response)
                     time.sleep(self._inbound_poll_interval)
@@ -322,7 +324,7 @@ class TwitchChatObserver(object):
             worker.join()
 
     def _process_server_messages(self, response):
-        for message in response.split('\r\n'):
+        for message in [m for m in response.split('\r\n') if m]:
             # Confirm that we are still listening
             if message == 'PING :tmi.twitch.tv':
                 with self._socket_lock:
