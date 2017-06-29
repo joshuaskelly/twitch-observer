@@ -12,13 +12,22 @@ Welcome to twitch-observer's documentation!
 
 .. automodule:: twitchobserver.twitchobserver
 
-.. autoclass:: BadTwitchChatEvent
+TwitchChatObserver
+==================
+
+.. autoclass:: TwitchChatObserver
    :members:
+
+TwitchChatEvent
+===============
 
 .. autoclass:: TwitchChatEvent
    :members:
 
-.. autoclass:: TwitchChatObserver
+BadTwitchChatEvent
+==================
+
+.. autoclass:: BadTwitchChatEvent
    :members:
 
 Indices and tables
