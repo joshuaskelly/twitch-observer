@@ -36,6 +36,7 @@ CLIENT_PART_MESSAGE = 'PART #channel\r\n'.encode('utf-8')
 SERVER_WHISPER_MESSAGE = ':nickname!nickname@nickname.tmi.twitch.tv WHISPER nickname :message\r\n'.encode('utf-8')
 CLIENT_WHISPER_MESSAGE = 'PRIVMSG #None :/w nickname message\r\n'.encode('utf-8')
 
+SERVER_USERSTATE_TAGS_MESSAGE = '@badges=moderator/1;color=;display-name=nickname;emote-sets=0;mod=1;subscriber=0;user-type=mod :tmi.twitch.tv USERSTATE #channel'.encode('utf-8')
 
 class TestBasicFunctionality(unittest.TestCase):
     def setUp(self):
@@ -201,6 +202,33 @@ class TestBasicFunctionality(unittest.TestCase):
             time.sleep(0.05)
 
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_WHISPER_MESSAGE, 'Observer should respond with PRIVMSG response')
+
+    def test_receive_userstate_tags(self):
+        self.mock_socket.return_value.recv.side_effect = [SERVER_USERSTATE_TAGS_MESSAGE]
+
+        callback_invoked = False
+
+        def verify_event(event):
+            nonlocal callback_invoked
+            callback_invoked = True
+
+            expected_tags = {
+                'display-name': 'nickname',
+                'emote-sets': '0',
+                'mod': '1',
+                'color': '',
+                'badges': 'moderator/1',
+                'user-type': 'mod',
+                'subscriber': '0'
+            }
+
+            self.assertEqual(event.type, 'TWITCHCHATUSERSTATE', "Type should be 'TWITCHCHATUSERSTATE'")
+            self.assertEqual(event.nickname, 'tmi.twitch.tv', "Nickname should be 'tmi.twitch.tv'")
+            self.assertEqual(event.tags, expected_tags, 'Event tags should be equal')
+
+        self.observer.subscribe(verify_event)
+        self.observer.start()
+        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
 
     def test_truncated_messages(self):
         # Bit of a hack. Because the main thread handles consuming the first
