@@ -44,7 +44,7 @@ class TestBasicFunctionality(unittest.TestCase):
         self.observer._inbound_poll_interval = 0
         self.observer._outbound_send_interval = 0
 
-        self._patcher = unittest.mock.patch('socket.socket', spec=True)
+        self._patcher = mock.patch('socket.socket', spec=True)
         self.mock_socket = self._patcher.start()
         self.mock_socket.return_value.connect.return_value = None
         self.mock_socket.return_value.recv.side_effect = [''.encode('utf-8')]
@@ -96,13 +96,10 @@ class TestBasicFunctionality(unittest.TestCase):
 
     def test_receive_privmsg(self):
         self.mock_socket.return_value.recv.side_effect = [SERVER_PRIVMSG_MESSAGE]
-
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
-
+            self.callback_invoked = True
             self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.message, 'message', "Message should be 'message'")
@@ -110,26 +107,20 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
     def test_send_privmsg(self):
         self.observer.start()
         self.observer.send_message('message', 'channel')
-
-        # Wait for events to process
-        while self.observer._outbound_event_queue:
-            time.sleep(0.05)
-
+        self.observer.stop()
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_PRIVMSG_MESSAGE, 'Observer should respond with PRIVMSG response')
 
     def test_receive_join(self):
         self.mock_socket.return_value.recv.side_effect = [SERVER_JOIN_MESSAGE]
-
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
+            self.callback_invoked = True
 
             self.assertEqual(event.type, 'TWITCHCHATJOIN', "Type should be 'TWITCHCHATJOIN'")
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
@@ -137,80 +128,61 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
     def test_send_join(self):
         self.observer.start()
         self.observer.join_channel('channel')
-
-        # Wait for events to process
-        while self.observer._outbound_event_queue:
-            time.sleep(0.05)
-
+        self.observer.stop()
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_JOIN_MESSAGE, 'Observer should respond with JOIN response')
 
     def test_receive_part(self):
         self.mock_socket.return_value.recv.side_effect = [SERVER_PART_MESSAGE]
-
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
-
+            self.callback_invoked = True
             self.assertEqual(event.type, 'TWITCHCHATLEAVE', "Type should be 'TWITCHCHATLEAVE'")
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
     def test_send_part(self):
         self.observer.start()
         self.observer.leave_channel('channel')
-
-        # Wait for events to process
-        while self.observer._outbound_event_queue:
-            time.sleep(0.05)
-
+        self.observer.stop()
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_PART_MESSAGE, 'Observer should respond with PART response')
 
     def test_receive_whisper(self):
         self.mock_socket.return_value.recv.side_effect = [SERVER_WHISPER_MESSAGE]
-
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
-
+            self.callback_invoked = True
             self.assertEqual(event.type, 'TWITCHCHATWHISPER', "Type should be 'TWITCHCHATWHISPER'")
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.message, 'message', "Message should be 'message'")
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
     def test_send_whisper(self):
         self.observer.start()
         self.observer.send_whisper('nickname', 'message')
-
-        # Wait for events to process
-        while self.observer._outbound_event_queue:
-            time.sleep(0.05)
-
+        self.observer.stop()
         self.assertEqual(self.mock_socket.return_value.send.call_args[0][0], CLIENT_WHISPER_MESSAGE, 'Observer should respond with PRIVMSG response')
 
     def test_receive_userstate_tags(self):
         self.mock_socket.return_value.recv.side_effect = [SERVER_USERSTATE_TAGS_MESSAGE]
 
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
+            self.callback_invoked = True
 
             expected_tags = {
                 'display-name': 'nickname',
@@ -228,7 +200,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
     def test_truncated_messages(self):
         # Bit of a hack. Because the main thread handles consuming the first
@@ -236,11 +208,10 @@ class TestBasicFunctionality(unittest.TestCase):
         # ignored.
         self.mock_socket.return_value.recv.side_effect = [''.encode('utf-8'), SERVER_PRIVMSG_MESSAGE[:18], SERVER_PRIVMSG_MESSAGE[18:]]
 
-        callback_invoked = False
+        self.callback_invoked = False
 
         def verify_event(event):
-            nonlocal callback_invoked
-            callback_invoked = True
+            self.callback_invoked = True
 
             self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
@@ -249,7 +220,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.observer.subscribe(verify_event)
         self.observer.start()
-        self.assertTrue(callback_invoked, 'Subscriber callback should be invoked')
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
 
 if __name__ == '__main__':
