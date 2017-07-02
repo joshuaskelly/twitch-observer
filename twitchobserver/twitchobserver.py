@@ -312,14 +312,6 @@ class TwitchChatObserver(object):
 
         self._is_running = False
 
-        if self._socket:
-            with self._socket_lock:
-                sock = self._socket
-                self._socket = None
-
-                sock.shutdown(socket.SHUT_RDWR)
-                sock.close()
-
         if self._inbound_worker_thread:
             worker = self._inbound_worker_thread
             self._inbound_worker_thread = None
@@ -329,6 +321,14 @@ class TwitchChatObserver(object):
             worker = self._outbound_worker_thread
             self._outbound_worker_thread = None
             worker.join()
+
+        if self._socket:
+            with self._socket_lock:
+                sock = self._socket
+                self._socket = None
+
+                sock.shutdown(socket.SHUT_RDWR)
+                sock.close()
 
     def _process_server_messages(self, response):
         for message in [m for m in response.split('\r\n') if m]:
