@@ -67,7 +67,7 @@ class TwitchChatEvent(object):
 
 
 # Server messages. Groups: (nickname_or_servername, command, parameters)
-_sever_message_re = re.compile(':(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
+_sever_message_re = re.compile('(?:@(\S*)\s+)?:(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
 
 # PRIVMSG Parameters. Groups: (channel, message)
 _privmsg_params_re = re.compile('#(\w+) :([\s\S]*)')
@@ -221,6 +221,7 @@ class TwitchChatObserver(object):
         # Request Twitch-Specific Capabilities
         self._socket.send('CAP REQ :twitch.tv/membership\r\n'.encode('utf-8'))
         self._socket.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
+        self._socket.send('CAP REQ :twitch.tv/tags\r\n'.encode('utf-8'))
 
         response = self._socket.recv(1024).decode('utf-8')
         self._socket.settimeout(0.25)
@@ -234,11 +235,19 @@ class TwitchChatObserver(object):
             Twitch IRC.
             """
 
+            truncated_response = ''
+
             # Handle socket responses
             while self._is_running:
                 try:
                     with self._socket_lock:
-                        response = self._socket.recv(1024).decode('utf-8')
+                        response = truncated_response + self._socket.recv(1024).decode('utf-8')
+
+                        if '\r\n' in response:
+                            response, truncated_response = response.rsplit('\r\n', 1)
+
+                        else:
+                            response, truncated_response = '', response
 
                     self._process_server_messages(response)
                     time.sleep(self._inbound_poll_interval)
@@ -322,7 +331,7 @@ class TwitchChatObserver(object):
             worker.join()
 
     def _process_server_messages(self, response):
-        for message in response.split('\r\n'):
+        for message in [m for m in response.split('\r\n') if m]:
             # Confirm that we are still listening
             if message == 'PING :tmi.twitch.tv':
                 with self._socket_lock:
@@ -336,11 +345,18 @@ class TwitchChatObserver(object):
             # Handle sever messages
             match = _sever_message_re.match(message)
             if match:
-                nick, cmd, params = match.groups()
+                tags, nick, cmd, params = match.groups()
                 event = TwitchChatEvent(command=cmd)
                 event.nickname = nick
                 event._command = cmd
                 event._params = params
+
+                if tags:
+                    event.tags = {}
+
+                    for tag_pair in tags.split(';'):
+                        key, value = tag_pair.split('=')
+                        event.tags[key] = value
 
                 if cmd in ('JOIN', 'PART', 'USERSTATE', 'ROOMSTATE'):
                     event.channel = params[1:]
