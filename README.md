@@ -2,7 +2,7 @@
 
 # twitch-observer
 
-[![License: GPL v3](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE) [![Python 2](https://img.shields.io/badge/python-2-blue.svg)](https://www.python.org/) [![Python 3](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/) [![Build Status](https://travis-ci.org/JoshuaSkelly/twitch-observer.svg?branch=master)](https://travis-ci.org/JoshuaSkelly/twitch-observer)
+[![License: GPL v3](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) [![Python 2](https://img.shields.io/badge/python-2-blue.svg)](https://www.python.org/) [![Python 3](https://img.shields.io/badge/python-3-blue.svg)](https://www.python.org/) [![Build Status](https://travis-ci.org/JoshuaSkelly/twitch-observer.svg?branch=master)](https://travis-ci.org/JoshuaSkelly/twitch-observer)
 
 Turn Twitch chatter into Python events.
 
