@@ -23,7 +23,7 @@ twitch-observer Documentation
 Turn Twitch chatter into Python events.
 
 Features
-========
+--------
 
 - *Pure Python:* No extra dependencies. Just plain and simple Python.
 - *Small API:* With three classes and twelve methods, you can learn it over a coffee break.
