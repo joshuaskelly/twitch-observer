@@ -194,7 +194,7 @@ observer.send_message('Voting has started!', 'channel')
 observer.start()
 observer.join_channel('channel')
 time.sleep(60)
-observer.unsubscribe('channel')
+observer.unsubscribe(handle_event)
 
 observer.send_message('Voting is over!', 'channel')
 
