@@ -8,25 +8,19 @@ import warnings
 
 
 class BadTwitchChatEvent(Exception):
+    """A class that is raised if a bad Twitch chat event occured."""
+
     pass
 
 
 class TwitchChatEvent(object):
     """A class for representing Twitch chat events.
     
-    Attributes:
-        type: Type of the event. Always will be 'TWITCHCHATEVENT'.
-        
-        nickname: The nickname of the user.
-        
-        channel: The name of the channel.
-        
-        command: The command sent. Will be one of the following:
-            - JOIN
-            - PART
-            - PRIVMSG
-            
-        message: The message sent by the user.
+    :param type: Type of the event. Always will be 'TWITCHCHATEVENT'
+    :param nickname: The nickname of the user
+    :param channel: The name of the channel
+    :param command: The command sent. Will be one of the following: JOIN, PART or PRIVMSG
+    :param message: The message sent by the user
     """
 
     def __init__(self, channel=None, command=None, message=''):
@@ -58,6 +52,8 @@ class TwitchChatEvent(object):
             self.message = message
 
     def dumps(self):
+        """Dump the event to a readable string for the socket communation."""
+
         message = getattr(self, 'message', '')
 
         if message:
@@ -80,16 +76,10 @@ _mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
 
 
 class TwitchChatObserver(object):
-    """Class for watching a Twitch channel. Creates events for various chat
-    messages.
+    """Class for watching a Twitch channel. Creates events for various chat messages.
     
-    Args:
-        nickname: The user nickname to connect to the channel as.
-
-        password: The OAuth token to authenticate with.
-
-        channel: Optional. The name of the initial channel to connect to. This
-            is typically the user's nickname.
+    :param nickname: The user nickname to connect to the channel as
+    :param password: The OAuth token to authenticate with
     """
 
     def __init__(self, nickname, password):
@@ -142,7 +132,7 @@ class TwitchChatObserver(object):
     def get_events(self):
         """Returns a sequence of events since the last time called.
         
-        Returns: A sequence of TwitchChatEvents
+        :return: A sequence of TwitchChatEvents
         """
 
         with self._inbound_lock:
@@ -161,10 +151,10 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
-    def send_message(self, message, channel, use_color=False):
+    def send_message(self, message, channel):
         """Sends a message to a channel."""
 
-        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', "/me {}".format(message) if use_color else message))
+        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
 
     def join_channel(self, channel):
         """Joins a channel."""

@@ -32,7 +32,7 @@ Features
    :maxdepth: 2
    :caption: Contents:
 
-.. automodule:: twitchobserver.twitchobserver
+.. module:: twitchobserver.twitchobserver
 
 TwitchChatObserver
 ==================
@@ -52,9 +52,3 @@ BadTwitchChatEvent
 .. autoclass:: BadTwitchChatEvent
    :members:
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
