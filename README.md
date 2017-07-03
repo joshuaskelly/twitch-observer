@@ -137,7 +137,17 @@ observer.clear_chat_history('channel')
 
 ## Tests
 
-```python -m unittest discover -s tests```
+```$ python -m unittest discover -s tests```
+
+## Build the Docs
+
+Navigate to `docs` and run either
+
+```$ make html```
+
+or
+
+```$ make latexpdf```
 
 ## Examples
 

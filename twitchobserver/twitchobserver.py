@@ -8,25 +8,19 @@ import warnings
 
 
 class BadTwitchChatEvent(Exception):
+    """A class that is raised if a bad Twitch chat event occured."""
+
     pass
 
 
 class TwitchChatEvent(object):
     """A class for representing Twitch chat events.
     
-    Attributes:
-        type: Type of the event. Always will be 'TWITCHCHATEVENT'.
-        
-        nickname: The nickname of the user.
-        
-        channel: The name of the channel.
-        
-        command: The command sent. Will be one of the following:
-            - JOIN
-            - PART
-            - PRIVMSG
-            
-        message: The message sent by the user.
+    :param type: Type of the event. Always will be 'TWITCHCHATEVENT'
+    :param nickname: The nickname of the user
+    :param channel: The name of the channel
+    :param command: The command sent. Will be one of the following: JOIN, PART or PRIVMSG
+    :param message: The message sent by the user
     """
 
     def __init__(self, channel=None, command=None, message=''):
@@ -58,6 +52,8 @@ class TwitchChatEvent(object):
             self.message = message
 
     def dumps(self):
+        """Dump the event to a readable string for the socket communation."""
+
         message = getattr(self, 'message', '')
 
         if message:
@@ -80,16 +76,10 @@ _mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
 
 
 class TwitchChatObserver(object):
-    """Class for watching a Twitch channel. Creates events for various chat
-    messages.
+    """Class for watching a Twitch channel. Creates events for various chat messages.
     
-    Args:
-        nickname: The user nickname to connect to the channel as.
-
-        password: The OAuth token to authenticate with.
-
-        channel: Optional. The name of the initial channel to connect to. This
-            is typically the user's nickname.
+    :param nickname: The user nickname to connect to the channel as
+    :param password: The OAuth token to authenticate with
     """
 
     def __init__(self, nickname, password):
@@ -112,14 +102,16 @@ class TwitchChatObserver(object):
     def subscribe(self, callback):
         """Receive events from watched channel.
         
-        Args:
-            callback: A function that takes a single TwitchChatEvent argument.
+        :param callback: A function that takes a single TwitchChatEvent argument
         """
 
         self._subscribers.append(callback)
 
     def unsubscribe(self, callback):
-        """Unsubscribe a callback from the observer."""
+        """Unsubscribe a callback from the observer.
+
+        :param callback: A function that has been subscribed prior
+        """
 
         if callback in self._subscribers:
             self._subscribers.remove(callback)
@@ -142,7 +134,7 @@ class TwitchChatObserver(object):
     def get_events(self):
         """Returns a sequence of events since the last time called.
         
-        Returns: A sequence of TwitchChatEvents
+        :return: A sequence of TwitchChatEvents
         """
 
         with self._inbound_lock:
@@ -162,42 +154,70 @@ class TwitchChatObserver(object):
                 self._outbound_event_queue.append(event)
 
     def send_message(self, message, channel):
-        """Sends a message to a channel."""
+        """Sends a message to a channel.
+
+        :param message: The message to be send
+        :param channel: The channel name
+        """
 
         self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
 
     def join_channel(self, channel):
-        """Joins a channel."""
+        """Joins a channel.
+
+        :param channel: The channel name
+        """
 
         self._send_events(TwitchChatEvent(channel, 'JOIN'))
 
     def leave_channel(self, channel):
-        """Leaves a channel."""
+        """Leaves a channel.
+
+        :param channel: The channel name
+        """
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
 
     def send_whisper(self, user, message):
-        """Sends a whisper (private message) to a user."""
+        """Sends a whisper (private message) to a user.
+
+        :param user: The user name
+        :param message: The message to be whispered
+        """
 
         self.send_message("/w {} {}".format(user, message), None)
 
     def list_moderators(self, channel):
-        """Lists all moderators of a given channel."""
+        """Lists all moderators of a given channel.
+
+        :param channel: The channel name
+        """
 
         self.send_message("/mods", channel)
 
     def ban_user(self, user, channel):
-        """Bans a user from a channel."""
+        """Bans a user from a channel.
+
+        :param user: The user name
+        :param channel: The channel name
+        """
 
         self.send_message("/ban {}".format(user), channel)
 
     def unban_user(self, user, channel):
-        """Unbans a user from a channel."""
+        """Unbans a user from a channel.
+
+        :param user: The user name
+        :param channel: The channel name
+        """
 
         self.send_message("/unban {}".format(user), channel)
 
     def clear_chat_history(self, channel):
-        """Clears the chat history of a channel."""
+        """Clears the chat history of a channel.
+
+        :param channel: The channel name
+        """
 
         self.send_message("/clear", channel)
 
@@ -208,8 +228,7 @@ class TwitchChatObserver(object):
         password. If successful a worker thread will be started to handle
         socket communication.
 
-        Raises:
-            RuntimeError: If authentication fails
+        :raises RuntimeError: If authentication fails
         """
 
         # Connect to Twitch via IRC
@@ -301,9 +320,7 @@ class TwitchChatObserver(object):
         Stop watching the channel, shutdown the socket, and stop the worker
         threads once all of the outbound events have been sent.
 
-        Args:
-            force_stop: Immediately stop and do not wait for remaining outbound
-                events to be sent.
+        :param force_stop: Immediately stop and do not wait for remaining outbound events to be sent.
         """
 
         # Wait until all outbound events are sent

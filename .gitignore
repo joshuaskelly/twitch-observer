@@ -14,3 +14,6 @@
 *.pyc
 *.egg-info
 .cache
+
+# Ignore Sphinx documentation artifacts
+docs/_build/
