@@ -1,6 +1,6 @@
 PYTHON_VERSION := $(shell python -c 'import sys; print(sys.version_info[0])')
 
-.PHONY: install uninstall install-dev-dependencies test clean
+.PHONY: install uninstall install-dev-dependencies test docs clean
 
 install:
 	pip install .
@@ -16,6 +16,10 @@ endif
 test:
 	python -m unittest discover -s tests
 
+docs:
+	$(MAKE) -C ./docs html
+
 clean:
 	find . -name "*.pyc" -delete
 	rm -rf .cache
+	$(MAKE) -C ./docs clean
