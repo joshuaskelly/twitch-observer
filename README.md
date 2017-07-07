@@ -29,6 +29,10 @@ observer.send_message('Hello and goodbye', 'channel')
 observer.leave_channel('channel')
 ```
 
+## Documentation
+
+API documentation can be found over on [ReadtheDocs.org](http://twitch-observer.readthedocs.io/en/latest).
+
 ## Tests
 
 ```$ python -m unittest discover -s tests```
@@ -58,6 +62,8 @@ with Observer('Nick', 'oauth:abcdefghijklmnopqrstuvwxyz0123') as observer:
             observer.leave_channel('channel')
             break
 ```
+
+More examples can be found in the [Cookbook](https://github.com/JoshuaSkelly/twitch-observer/wiki/Cookbook).
 
 ## Contributors
 
