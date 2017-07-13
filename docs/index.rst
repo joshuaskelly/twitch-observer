@@ -11,15 +11,6 @@ twitch-observer Documentation
    :align: center
    :alt: Header Image
 
-.. image:: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
-   :target: https://github.com/JoshuaSkelly/twitch-observer/LICENSE
-.. image:: https://img.shields.io/badge/python-2-blue.svg?style=flat-square
-   :target: https://www.python.org/
-.. image:: https://img.shields.io/badge/python-3-blue.svg?style=flat-square
-   :target: https://www.python.org/
-.. image:: https://travis-ci.org/JoshuaSkelly/twitch-observer.svg?branch=master?style=flat-square
-   :target: https://travis-ci.org/JoshuaSkelly/twitch-observer
-
 Turn Twitch chatter into Python events.
 
 Features

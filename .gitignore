@@ -17,3 +17,4 @@
 
 # Ignore Sphinx documentation artifacts
 docs/_build/
+docs/_static/
