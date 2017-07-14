@@ -222,6 +222,12 @@ class TestBasicFunctionality(unittest.TestCase):
         self.observer.start()
         self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
+    def test_context_manager_force_stop(self):
+        with Observer('nickname', 'password123') as observer:
+            observer.stop(force_stop=True)
+            self.assertTrue(len(observer._outbound_event_queue) == 0, 'Outbound event queue should be empty')
+            self.assertTrue(len(observer._inbound_event_queue) == 0, 'Inbound event queue should be empty')
+
 
 if __name__ == '__main__':
     unittest.main()

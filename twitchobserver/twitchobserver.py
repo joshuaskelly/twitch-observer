@@ -327,17 +327,23 @@ class TwitchChatObserver(object):
         while self._outbound_event_queue and not force_stop:
             time.sleep(self._outbound_send_interval)
 
+        timeout = None
+        if force_stop:
+            timeout = 0
+
         self._is_running = False
 
         if self._inbound_worker_thread:
             worker = self._inbound_worker_thread
             self._inbound_worker_thread = None
-            worker.join()
+            self._inbound_event_queue = []
+            worker.join(timeout)
 
         if self._outbound_worker_thread:
             worker = self._outbound_worker_thread
             self._outbound_worker_thread = None
-            worker.join()
+            self._outbound_event_queue = []
+            worker.join(timeout)
 
         if self._socket:
             with self._socket_lock:
