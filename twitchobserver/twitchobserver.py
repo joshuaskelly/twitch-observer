@@ -61,6 +61,9 @@ class TwitchChatEvent(object):
 
         return '{} #{}{}\r\n'.format(self._command, self.channel, message)
 
+    def __str__(self):
+        return "{}:{}:{}:{}:{}:{}".format(self.type, self.channel, self.nickname, getattr(self, "mode", ""), getattr(self, "message", ""), getattr(self, "tags", ""))
+
 
 # Server messages. Groups: (nickname_or_servername, command, parameters)
 _sever_message_re = re.compile('(?:@(\S*)\s+)?:(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
