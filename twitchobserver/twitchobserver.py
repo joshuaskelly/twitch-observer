@@ -156,15 +156,6 @@ class TwitchChatObserver(object):
 
                 self._outbound_event_queue.append(event)
 
-    def send_message(self, message, channel):
-        """Sends a message to a channel.
-
-        :param message: The message to be send
-        :param channel: The channel name
-        """
-
-        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
-
     def join_channel(self, channel):
         """Joins a channel.
 
@@ -181,6 +172,15 @@ class TwitchChatObserver(object):
         
         self._send_events(TwitchChatEvent(channel, 'PART'))
 
+    def send_message(self, message, channel):
+        """Sends a message to a channel.
+
+        :param message: The message to be send
+        :param channel: The channel name
+        """
+
+        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
+
     def send_whisper(self, user, message):
         """Sends a whisper (private message) to a user.
 
@@ -190,6 +190,14 @@ class TwitchChatObserver(object):
 
         self.send_message("/w {} {}".format(user, message), None)
 
+    def change_color(self, color):
+        """Changes the color of your name in chat.
+
+        :param color: The new name color. Can be a hex value like #000000 or one of the following: Blue, Coral, DodgerBlue, SpringGreen, YellowGreen, Green, OrangeRed, Red, GoldenRod, HotPink, CadetBlue, SeaGreen, Chocolate, BlueViolet or Firebrick
+        """
+
+        self.send_message("/color {}".format(color), None)
+
     def list_moderators(self, channel):
         """Lists all moderators of a given channel.
 
@@ -197,6 +205,32 @@ class TwitchChatObserver(object):
         """
 
         self.send_message("/mods", channel)
+
+    def add_moderator(self, channel, nickname):
+        """Adds a user to the list of chat moderators.
+
+        :param channel: The channel name
+        :param nickname: The nickname of the user
+        """
+
+        self.send_message("/mod {}".format(nickname), channel)
+
+    def remove_moderator(self, channel, nickname):
+        """Removes a user from the list of chat moderators.
+
+        :param channel: The channel name
+        :param nickname: The nickname of the user
+        """
+
+        self.send_message("/unmod {}".format(nickname), channel)
+
+    def clear_chat_history(self, channel):
+        """Clears the chat history of a channel.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/clear", channel)
 
     def ban_user(self, user, channel):
         """Bans a user from a channel.
@@ -216,13 +250,82 @@ class TwitchChatObserver(object):
 
         self.send_message("/unban {}".format(user), channel)
 
-    def clear_chat_history(self, channel):
-        """Clears the chat history of a channel.
+    def ignore_user(self, nickname, channel):
+        """Ignores a particular user by not showing his messages in chat.
+
+        :param nickname: The nickname of the user
+        :param channel: The channel name
+        """
+
+        self.send_message("/ignore {}".format(nickname), channel)
+
+    def unignore_user(self, nickname, channel):
+        """Unignores a particular user by showing his messages in chat again.
+
+        :param nickname: The nickname of the user
+        :param channel: The channel name
+        """
+
+        self.send_message("/unignore {}".format(nickname), channel)
+
+    def timout_user(self, nickname, channel, duration=600):
+        """Timeouts a user by deleting all previously send messages and letting him not be able to send messages for ten minutes (default) or for `duration` of seconds.
+
+        :param nickname: The nickname of the user
+        :param channel: The channel name
+        :param duration: The duration to ban the user from chat (in seconds). Defaults to ten minutes
+        """
+
+        self.send_message("/timeout {} {}".format(nickname, duration), channel)
+
+    def set_slow_mode(self, channel, duration):
+        """Sets the chat to slow mode, i.e. each message of a user needs to have `duration` of seconds in between them.
+
+        :param channel: The channel name
+        :param duration: The duration of forced time between two messages (in seconds)
+        """
+
+        self.send_message("/slow {}".format(duration), channel)
+
+    def unset_slow_mode(self, channel):
+        """Sets the chat to normal mode again, if being in slow mode previously.
 
         :param channel: The channel name
         """
 
-        self.send_message("/clear", channel)
+        self.send_message("/slowoff", channel)
+
+    def set_subscribers_mode(self, channel):
+        """Sets the chat to subscribers-only mode where only the streamer, moderators and subscribers can write messages.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/subscribers", channel)
+
+    def unset_subscribers_mode(self, channel):
+        """Sets the chat to normal mode again, if being in subscribers-only mode previously.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/subscribersoff", channel)
+
+    def set_r9k_mode(self, channel):
+        """Sets the chat to r9k mode where messages with more than nine characters are checked for uniquness.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/r9kbeta", channel)
+
+    def unset_r9k_mode(self, channel):
+        """Sets the chat to normal mode again, if being in r9k mode previously.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/r9kbetaoff", channel)
 
     def start(self):
         """Starts the observer.
