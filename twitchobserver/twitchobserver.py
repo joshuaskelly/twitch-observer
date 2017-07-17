@@ -278,7 +278,7 @@ class TwitchChatObserver(object):
 
         self.send_message("/timeout {} {}".format(nickname, duration), channel)
 
-    def manage_slow_mode(self, channel, duration=10, enable=True):
+    def slow_mode(self, channel, duration=10, enable=True):
         """Manages the slow mode of the chat, i.e. each message of a user needs to have `duration` of seconds in between them.
 
         :param channel: The channel name
@@ -291,7 +291,7 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/slowoff", channel)
 
-    def manage_subscribers_only_mode(self, channel, enable=True):
+    def subscribers_only_mode(self, channel, enable=True):
         """Manages the subscribers-only mode of the chat where only the streamer, moderators and subscribers can write messages.
 
         :param channel: The channel name
@@ -303,7 +303,7 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/subscribersoff", channel)
 
-    def manage_r9k_mode(self, channel, enable=True):
+    def r9k_mode(self, channel, enable=True):
         """Manages the r9k mode of the chat where messages with more than nine characters are checked for uniquness.
 
         :param channel: The channel name
@@ -315,7 +315,7 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/r9kbetaoff", channel)     
 
-    def manage_followers_only_mode(self, channel, enable=True):
+    def followers_only_mode(self, channel, enable=True):
         """Manages the followers-only mode of the chat.
 
         :param channel: The channel name
@@ -327,7 +327,7 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/followersoff", channel)
 
-    def manage_emoteonly_mode(self, channel, enable=True):
+    def emoteonly_mode(self, channel, enable=True):
         """Manages the emote-only mode of the chat.
 
         :param channel: The channel name
