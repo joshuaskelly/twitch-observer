@@ -190,10 +190,10 @@ class TwitchChatObserver(object):
 
         self.send_message("/w {} {}".format(user, message), None)
 
-    def change_color(self, color):
+    def change_name_color(self, color):
         """Changes the color of your name in chat.
 
-        :param color: The new name color. Can be a hex value like #000000 or one of the following: Blue, Coral, DodgerBlue, SpringGreen, YellowGreen, Green, OrangeRed, Red, GoldenRod, HotPink, CadetBlue, SeaGreen, Chocolate, BlueViolet or Firebrick
+        :param color: The new color of the name. Can be a hex value like #000000 or one of the colors defined in `colors.Color`
         """
 
         self.send_message("/color {}".format(color), None)
@@ -278,86 +278,69 @@ class TwitchChatObserver(object):
 
         self.send_message("/timeout {} {}".format(nickname, duration), channel)
 
-    def set_slow_mode(self, channel, duration):
-        """Sets the chat to slow mode, i.e. each message of a user needs to have `duration` of seconds in between them.
+    def manage_slow_mode(self, channel, duration=None, enable=True):
+        """Manages the slow mode of the chat, i.e. each message of a user needs to have `duration` of seconds in between them.
 
         :param channel: The channel name
         :param duration: The duration of forced time between two messages (in seconds)
+        :param enable: Boolean to decide whether to enable or disable the slow mode (defaults to True)
         """
 
-        self.send_message("/slow {}".format(duration), channel)
+        if enable:
+            if not duration:
+                warnings.warn("Slow mode needs to have a duration set.", RuntimeWarning)
+                return
+            self.send_message("/slow {}".format(duration), channel)
+        else:
+            self.send_message("/slowoff", channel)
 
-    def unset_slow_mode(self, channel):
-        """Sets the chat to normal mode again, if being in slow mode previously.
+    def manage_subscribers_only_mode(self, channel, enable=True):
+        """Manages the subscribers-only mode of the chat where only the streamer, moderators and subscribers can write messages.
 
         :param channel: The channel name
+        :param enable: Boolean to decide whether to enable or disable the subscribers-only mode (defaults to True)
         """
 
-        self.send_message("/slowoff", channel)
+        if enable:
+            self.send_message("/subscribers", channel)
+        else:
+            self.send_message("/subscribersoff", channel)
 
-    def set_subscribers_mode(self, channel):
-        """Sets the chat to subscribers-only mode where only the streamer, moderators and subscribers can write messages.
+    def manage_r9k_mode(self, channel, enable=True):
+        """Manages the r9k mode of the chat where messages with more than nine characters are checked for uniquness.
 
         :param channel: The channel name
+        :param enable: Boolean to decide whether to enable or disable the r9k mode (defaults to True)
         """
 
-        self.send_message("/subscribers", channel)
+        if enable:
+            self.send_message("/r9kbeta", channel)
+        else:
+            self.send_message("/r9kbetaoff", channel)     
 
-    def unset_subscribers_mode(self, channel):
-        """Sets the chat to normal mode again, if being in subscribers-only mode previously.
+    def manage_followers_only_mode(self, channel, enable=True):
+        """Manages the followers-only mode of the chat.
 
         :param channel: The channel name
+        :param enable: Boolean to decide whether to enable or disable the followers-only mode (defaults to True)
         """
 
-        self.send_message("/subscribersoff", channel)
+        if enable:
+            self.send_message("/followers", channel)
+        else:
+            self.send_message("/followersoff", channel)
 
-    def set_r9k_mode(self, channel):
-        """Sets the chat to r9k mode where messages with more than nine characters are checked for uniquness.
+    def manage_emoteonly_mode(self, channel, enable=True):
+        """Manages the emote-only mode of the chat.
 
         :param channel: The channel name
+        :param enable: Boolean to decide whether to enable or disable the emote-only mode (defaults to True)
         """
 
-        self.send_message("/r9kbeta", channel)
-
-    def unset_r9k_mode(self, channel):
-        """Sets the chat to normal mode again, if being in r9k mode previously.
-
-        :param channel: The channel name
-        """
-
-        self.send_message("/r9kbetaoff", channel)
-
-    def set_followers_mode(self, channel):
-        """Sets the chat to followers mode.
-
-        :param channel: The channel name
-        """
-
-        self.send_message("/followers", channel)
-
-    def unset_followers_mode(self, channel):
-        """Sets the chat to normal mode again, if being in followers mode previously.
-
-        :param channel: The channel name
-        """
-
-        self.send_message("/followersoff", channel)
-
-    def set_emoteonly_mode(self, channel):
-        """Sets the chat to emote-only mode.
-
-        :param channel: The channel name
-        """
-
-        self.send_message("/emoteonly", channel)
-
-    def unset_emoteonly_mode(self, channel):
-        """Sets the chat to normal mode again, if being in emote-only mode previously.
-
-        :param channel: The channel name
-        """
-
-        self.send_message("/emoteonlyoff", channel)
+        if enable:
+            self.send_message("/emoteonly", channel)
+        else:
+            self.send_message("/emoteonlyoff", channel)
 
     def start(self):
         """Starts the observer.

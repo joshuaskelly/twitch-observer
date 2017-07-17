@@ -1,0 +1,18 @@
+class Color(object):
+    """A collection of colors for the chat name."""
+
+    BLUE = "Blue"
+    CORAL = "Coral"
+    DODGERBLUE = "DodgerBlue"
+    SPRINGGREEN = "SpringGreen"
+    YELLOWGREEN = "YellowGreen"
+    GREEN = "Green"
+    ORANGERED = "OrangeRed"
+    RED = "Red"
+    GOLDENROD = "GoldenRod"
+    HOTPINK = "HotPink"
+    CADETBLUE = "CadetBlue"
+    SEAGREEN = "SeaGreen"
+    CHOCOLATE = "Chocolate"
+    BLUEVIOLET = "BlueViolet"
+    FIREBRICK = "Firebrick"
