@@ -278,18 +278,15 @@ class TwitchChatObserver(object):
 
         self.send_message("/timeout {} {}".format(nickname, duration), channel)
 
-    def manage_slow_mode(self, channel, duration=None, enable=True):
+    def manage_slow_mode(self, channel, duration=10, enable=True):
         """Manages the slow mode of the chat, i.e. each message of a user needs to have `duration` of seconds in between them.
 
         :param channel: The channel name
-        :param duration: The duration of forced time between two messages (in seconds)
+        :param duration: The duration of forced time between two messages (in seconds, defaults to 10)
         :param enable: Boolean to decide whether to enable or disable the slow mode (defaults to True)
         """
 
         if enable:
-            if not duration:
-                warnings.warn("Slow mode needs to have a duration set.", RuntimeWarning)
-                return
             self.send_message("/slow {}".format(duration), channel)
         else:
             self.send_message("/slowoff", channel)
