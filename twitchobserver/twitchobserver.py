@@ -327,6 +327,38 @@ class TwitchChatObserver(object):
 
         self.send_message("/r9kbetaoff", channel)
 
+    def set_followers_mode(self, channel):
+        """Sets the chat to followers mode.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/followers", channel)
+
+    def unset_followers_mode(self, channel):
+        """Sets the chat to normal mode again, if being in followers mode previously.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/followersoff", channel)
+
+    def set_emoteonly_mode(self, channel):
+        """Sets the chat to emote-only mode.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/emoteonly", channel)
+
+    def unset_emoteonly_mode(self, channel):
+        """Sets the chat to normal mode again, if being in emote-only mode previously.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/emoteonlyoff", channel)
+
     def start(self):
         """Starts the observer.
 
