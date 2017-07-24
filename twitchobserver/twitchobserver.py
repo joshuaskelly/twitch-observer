@@ -25,25 +25,25 @@ class TwitchChatEvent(object):
 
     def __init__(self, channel=None, command=None, message=''):
         command_to_type = {
-            'JOIN': 'TWITCHCHATJOIN',
-            'PART': 'TWITCHCHATLEAVE',
-            'PRIVMSG': 'TWITCHCHATMESSAGE',
-            'MODE': 'TWITCHCHATMODE',
-            'CLEARCHAT': 'TWITCHCHATCLEARCHAT',
-            'HOSTTARGET': 'TWITCHCHATHOSTTARGET',
-            'NOTICE': 'TWITCHCHATNOTICE',
-            'RECONNECT': 'TWITCHCHATRECONNECT',
-            'ROOMSTATE': 'TWITCHCHATROOMSTATE',
-            'USERNOTICE': 'TWITCHCHATUSERNOTICE',
-            'USERSTATE': 'TWITCHCHATUSERSTATE',
-            'WHISPER': 'TWITCHCHATWHISPER'
+            'JOIN': TwitchChatEventType.TWITCHCHATJOIN,
+            'PART': TwitchChatEventType.TWITCHCHATLEAVE,
+            'PRIVMSG': TwitchChatEventType.TWITCHCHATMESSAGE,
+            'MODE': TwitchChatEventType.TWITCHCHATMODE,
+            'CLEARCHAT': TwitchChatEventType.TWITCHCHATCLEARCHAT,
+            'HOSTTARGET': TwitchChatEventType.TWITCHCHATHOSTTARGET,
+            'NOTICE': TwitchChatEventType.TWITCHCHATNOTICE,
+            'RECONNECT': TwitchChatEventType.TWITCHCHATRECONNECT,
+            'ROOMSTATE': TwitchChatEventType.TWITCHCHATROOMSTATE,
+            'USERNOTICE': TwitchChatEventType.TWITCHCHATUSERNOTICE,
+            'USERSTATE': TwitchChatEventType.TWITCHCHATUSERSTATE,
+            'WHISPER': TwitchChatEventType.TWITCHCHATWHISPER
         }
 
         if command in command_to_type:
             self.type = command_to_type[command]
 
         else:
-            self.type = 'TWITCHCHATCOMMAND'
+            self.type = TwitchChatEventType.TWITCHCHATCOMMAND
 
         self.channel = channel
         self._command = command
@@ -546,3 +546,41 @@ class TwitchChatObserver(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.stop()
+
+
+class TwitchChatEventType(object):
+    """A collection of twitch chat event types."""
+
+    TWITCHCHATJOIN = 'TWITCHCHATJOIN'
+    TWITCHCHATLEAVE = 'TWITCHCHATLEAVE'
+    TWITCHCHATMESSAGE = 'TWITCHCHATMESSAGE'
+    TWITCHCHATMODE = 'TWITCHCHATMODE'
+    TWITCHCHATCLEARCHAT = 'TWITCHCHATCLEARCHAT'
+    TWITCHCHATHOSTTARGET = 'TWITCHCHATHOSTTARGET'
+    TWITCHCHATNOTICE = 'TWITCHCHATNOTICE'
+    TWITCHCHATRECONNECT = 'TWITCHCHATRECONNECT'
+    TWITCHCHATROOMSTATE = 'TWITCHCHATROOMSTATE'
+    TWITCHCHATUSERNOTICE = 'TWITCHCHATUSERNOTICE'
+    TWITCHCHATUSERSTATE = 'TWITCHCHATUSERSTATE'
+    TWITCHCHATWHISPER = 'TWITCHCHATWHISPER'
+    TWITCHCHATCOMMAND = 'TWITCHCHATCOMMAND'
+
+
+class TwitchChatColor(object):
+    """A collection of colors for the chat name."""
+
+    BLUE = "Blue"
+    CORAL = "Coral"
+    DODGERBLUE = "DodgerBlue"
+    SPRINGGREEN = "SpringGreen"
+    YELLOWGREEN = "YellowGreen"
+    GREEN = "Green"
+    ORANGERED = "OrangeRed"
+    RED = "Red"
+    GOLDENROD = "GoldenRod"
+    HOTPINK = "HotPink"
+    CADETBLUE = "CadetBlue"
+    SEAGREEN = "SeaGreen"
+    CHOCOLATE = "Chocolate"
+    BLUEVIOLET = "BlueViolet"
+    FIREBRICK = "Firebrick"
