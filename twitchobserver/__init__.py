@@ -1,5 +1,6 @@
 from .twitchobserver import TwitchChatObserver as Observer
 from .twitchobserver import TwitchChatEvent as ChatEvent
-from .colors import Color
+from .twitchobserver import TwitchChatEventType as ChatEventType
+from .twitchobserver import TwitchChatColor as ChatColor
 
-__version__ = "0.7.6"
+__version__ = "0.7.7"

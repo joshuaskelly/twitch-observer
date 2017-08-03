@@ -13,11 +13,13 @@ twitch-observer Documentation
 
 Turn Twitch chatter into Python events.
 
+**twitchobserver** makes interacting with Twitch chat super easy. It is built and tuned for realtime applications. You can make chatbots chat. You can build Twitch Plays video games.
+
 Features
---------
+========
 
 - *Pure Python:* No extra dependencies. Just plain and simple Python.
-- *Small API:* With three classes and twelve methods, you can learn it over a coffee break.
+- *Small API:* With a few classes and a handful of methods, you can learn it over a coffee break.
 - *Event Based:* Makes writing apps easy and straightforward.
 - *Context Manager:* Further simplifies working with observers.
 
@@ -44,3 +46,29 @@ BadTwitchChatEvent
 
 .. autoclass:: BadTwitchChatEvent
    :members:
+
+TwitchChatEventType
+===================
+
+.. autoclass:: TwitchChatEventType
+   :members:
+   :undoc-members:
+
+TwitchChatColor
+===============
+
+.. autoclass:: TwitchChatColor
+   :members:
+   :undoc-members:
+
+Aliases
+=======
+
+There exist the following aliases:
+
+.. module:: twitchobserver
+
+.. autoclass:: Observer
+.. autoclass:: ChatEvent
+.. autoclass:: ChatEventType
+.. autoclass:: ChatColor
