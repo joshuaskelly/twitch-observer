@@ -353,10 +353,15 @@ class TwitchChatObserver(object):
         """
 
         def decorator(func):
+
             def wrapper(event):
                 if event.type == event_type:
                     return func(event)
+
+            self.subscribe(wrapper)
+
             return wrapper
+
         return decorator
 
     def start(self):
