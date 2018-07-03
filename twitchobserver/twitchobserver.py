@@ -348,8 +348,6 @@ class TwitchChatObserver(object):
         >>> @observer.on_event(ChatEventType.TWITCHCHATJOIN)
         >>> def handle_join_event(event):
         >>>     print(event.nickname + " joined")
-        >>> 
-        >>> observer.subscribe(handle_join_event)
         """
 
         def decorator(func):
