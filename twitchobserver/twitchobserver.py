@@ -339,6 +339,26 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/emoteonlyoff", channel)
 
+    def on_event(self, event_type):
+        """Decorator for event handlers based on the event type.
+
+        The handler takes an Event as argument.
+        
+        Usage:
+        >>> @observer.on_event(ChatEventType.TWITCHCHATJOIN)
+        >>> def handle_join_event(event):
+        >>>     print(event.nickname + " joined")
+        >>> 
+        >>> observer.subscribe(handle_join_event)
+        """
+
+        def decorator(func):
+            def wrapper(event):
+                if event.type == event_type:
+                    return func(event)
+            return wrapper
+        return decorator
+
     def start(self):
         """Starts the observer.
 
