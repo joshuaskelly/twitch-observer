@@ -342,12 +342,17 @@ class TwitchChatObserver(object):
     def on_event(self, event_type):
         """Decorator for event handlers based on the event type.
 
-        The handler takes an Event as argument.
+        The handler needs to take an event as argument.
         
+        :param event_type: A ChatEventType to listen for
+
         Usage:
-        >>> @observer.on_event(ChatEventType.TWITCHCHATJOIN)
-        >>> def handle_join_event(event):
-        >>>     print(event.nickname + " joined")
+        
+        .. code:: python
+
+            >>> @observer.on_event(ChatEventType.TWITCHCHATJOIN)
+            >>> def handle_join_event(event):
+            >>>     print(event.nickname + " joined")
         """
 
         def decorator(func):
