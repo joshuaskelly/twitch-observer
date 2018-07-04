@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'twitch-observer'
-copyright = '2017, Joshua Skelton, Felix Siebeneicker'
+copyright = '2018, Joshua Skelton, Felix Siebeneicker'
 author = 'Joshua Skelton, Felix Siebeneicker'
 
 # The version info for the project you're documenting, acts as replacement for
