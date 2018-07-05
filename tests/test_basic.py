@@ -8,7 +8,7 @@ if sys.version_info[0] == 3:
 else:
     import mock
 
-from twitchobserver import Observer
+from twitchobserver import Observer, ChatEventType
 
 SUCCESSFUL_LOGIN_MESSAGE = """:tmi.twitch.tv 001 nickname :Welcome, GLHF!\r
 :tmi.twitch.tv 002 nickname :Your host is tmi.twitch.tv\r
@@ -227,6 +227,22 @@ class TestBasicFunctionality(unittest.TestCase):
             observer.stop(force_stop=True)
             self.assertTrue(len(observer._outbound_event_queue) == 0, 'Outbound event queue should be empty')
             self.assertTrue(len(observer._inbound_event_queue) == 0, 'Inbound event queue should be empty')
+
+    def test_on_event_decorator(self):
+        self.mock_socket.return_value.recv.side_effect = [SERVER_PRIVMSG_MESSAGE]
+        self.callback_invoked = False
+
+        self.assertEqual(len(self.observer._subscribers), 0, 'There should be no subscribers')
+
+        @self.observer.on_event(ChatEventType.TWITCHCHATMESSAGE)
+        def verify_event(event):
+            self.callback_invoked = True
+            self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
+
+        self.assertEqual(len(self.observer._subscribers), 1, 'There should be a single subscriber')
+
+        self.observer.start()
+        self.assertTrue(self.callback_invoked, 'Subscriber callback should be invoked')
 
 
 if __name__ == '__main__':

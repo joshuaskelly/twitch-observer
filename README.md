@@ -73,6 +73,9 @@ More examples can be found in the [Cookbook](https://github.com/JoshuaSkelly/twi
 ---|---
 [Joshua Skelton](http://github.com/joshuaskelly) | [Felix Siebeneicker](https://github.com/pythooonuser)
 
+## Changelog
+For a detailed history of changes made to the twitchobserver see the [changelog](./CHANGELOG.md).
+
 ## License
 MIT
 
