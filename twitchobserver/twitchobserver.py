@@ -66,7 +66,7 @@ class TwitchChatEvent(object):
 
 
 # Server messages. Groups: (nickname_or_servername, command, parameters)
-_sever_message_re = re.compile('(?:@(\S*)\s+)?:(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
+_server_message_re = re.compile('(?:@(\S*)\s+)?:(\w*|tmi.twitch.tv)(?:!\w*)?(?:@\w*.tmi.twitch.tv)?\s+([A-Z]*|\d{3})\s+([^\r\n]*)')
 
 # PRIVMSG Parameters. Groups: (channel, message)
 _privmsg_params_re = re.compile('#(\w+) :([\s\S]*)')
@@ -511,8 +511,8 @@ class TwitchChatObserver(object):
                 self.stop(force_stop=True)
                 raise RuntimeError('Login authentication failed')
 
-            # Handle sever messages
-            match = _sever_message_re.match(message)
+            # Handle server messages
+            match = _server_message_re.match(message)
             if match:
                 tags, nick, cmd, params = match.groups()
                 event = TwitchChatEvent(command=cmd)
