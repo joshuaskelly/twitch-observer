@@ -4,3 +4,7 @@ In this changelog all modifications to the `twitchobserver` beginning from versi
 ## [0.8.0] 180704
 ### Added
 - Decorator for event handling (suggested by @Senpos)
+
+## [0.9.0] 180709
+### Added
+- Support for the `/marker` command

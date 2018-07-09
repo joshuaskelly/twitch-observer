@@ -339,6 +339,14 @@ class TwitchChatObserver(object):
         else:
             self.send_message("/emoteonlyoff", channel)
 
+    def set_marker(self, channel):
+        """Sets a stream marker for the Twitch Highlight feature.
+
+        :param channel: The channel name
+        """
+
+        self.send_message("/marker", channel)
+
     def on_event(self, event_type):
         """Decorator for event handlers based on the event type.
 
