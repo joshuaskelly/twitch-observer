@@ -8,3 +8,7 @@ In this changelog all modifications to the `twitchobserver` beginning from versi
 ## [0.9.0] 180709
 ### Added
 - Support for the `/marker` command
+
+## [0.9.1] 180709
+### Fixed
+- Typos (`sever` -> `server`)
