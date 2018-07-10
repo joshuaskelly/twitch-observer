@@ -8,7 +8,7 @@ if sys.version_info[0] == 3:
 else:
     import mock
 
-from twitchobserver import Observer, ChatEventType
+from twitchobserver import Observer, EventType
 
 SUCCESSFUL_LOGIN_MESSAGE = """:tmi.twitch.tv 001 nickname :Welcome, GLHF!\r
 :tmi.twitch.tv 002 nickname :Your host is tmi.twitch.tv\r
@@ -234,7 +234,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         self.assertEqual(len(self.observer._subscribers), 0, 'There should be no subscribers')
 
-        @self.observer.on_event(ChatEventType.TWITCHCHATMESSAGE)
+        @self.observer.on_event(EventType.MESSAGE)
         def verify_event(event):
             self.callback_invoked = True
             self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
