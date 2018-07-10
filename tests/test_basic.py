@@ -100,7 +100,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         def verify_event(event):
             self.callback_invoked = True
-            self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
+            self.assertEqual(event.type, EventType.MESSAGE, "Type should be " + EventType.MESSAGE)
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.message, 'message', "Message should be 'message'")
             self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
@@ -122,7 +122,7 @@ class TestBasicFunctionality(unittest.TestCase):
         def verify_event(event):
             self.callback_invoked = True
 
-            self.assertEqual(event.type, 'TWITCHCHATJOIN', "Type should be 'TWITCHCHATJOIN'")
+            self.assertEqual(event.type, EventType.JOIN, "Type should be " + EventType.JOIN)
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
 
@@ -142,7 +142,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         def verify_event(event):
             self.callback_invoked = True
-            self.assertEqual(event.type, 'TWITCHCHATLEAVE', "Type should be 'TWITCHCHATLEAVE'")
+            self.assertEqual(event.type, EventType.LEAVE, "Type should be " + EventType.LEAVE)
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
 
@@ -162,7 +162,7 @@ class TestBasicFunctionality(unittest.TestCase):
 
         def verify_event(event):
             self.callback_invoked = True
-            self.assertEqual(event.type, 'TWITCHCHATWHISPER', "Type should be 'TWITCHCHATWHISPER'")
+            self.assertEqual(event.type, EventType.WHISPER, "Type should be " + EventType.WHISPER)
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.message, 'message', "Message should be 'message'")
 
@@ -194,7 +194,7 @@ class TestBasicFunctionality(unittest.TestCase):
                 'subscriber': '0'
             }
 
-            self.assertEqual(event.type, 'TWITCHCHATUSERSTATE', "Type should be 'TWITCHCHATUSERSTATE'")
+            self.assertEqual(event.type, EventType.USERSTATE, "Type should be " + EventType.USERSTATE)
             self.assertEqual(event.nickname, 'tmi.twitch.tv', "Nickname should be 'tmi.twitch.tv'")
             self.assertEqual(event.tags, expected_tags, 'Event tags should be equal')
 
@@ -213,7 +213,7 @@ class TestBasicFunctionality(unittest.TestCase):
         def verify_event(event):
             self.callback_invoked = True
 
-            self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
+            self.assertEqual(event.type, EventType.MESSAGE, "Type should be " + EventType.MESSAGE)
             self.assertEqual(event.nickname, 'nickname', "Nickname should be 'nickname'")
             self.assertEqual(event.message, 'message', "Message should be 'message'")
             self.assertEqual(event.channel, 'channel', "Channel should be 'channel'")
@@ -237,7 +237,7 @@ class TestBasicFunctionality(unittest.TestCase):
         @self.observer.on_event(EventType.MESSAGE)
         def verify_event(event):
             self.callback_invoked = True
-            self.assertEqual(event.type, 'TWITCHCHATMESSAGE', "Type should be 'TWITCHCHATMESSAGE'")
+            self.assertEqual(event.type, EventType.MESSAGE, "Type should be " + EventType.MESSAGE)
 
         self.assertEqual(len(self.observer._subscribers), 1, 'There should be a single subscriber')
 
