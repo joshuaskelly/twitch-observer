@@ -69,9 +69,9 @@ More examples can be found in the [Cookbook](https://github.com/JoshuaSkelly/twi
 
 ## Contributors
 
-[![Joshua Skelton](https://avatars.githubusercontent.com/u/372642?s=130)](http://github.com/joshuaskelly) | [![Felix Siebeneicker](https://avatars0.githubusercontent.com/u/13063023?s=130)](https://github.com/pythooonuser)
----|---
-[Joshua Skelton](http://github.com/joshuaskelly) | [Felix Siebeneicker](https://github.com/pythooonuser)
+[![Joshua Skelton](https://avatars.githubusercontent.com/u/372642?s=130)](http://github.com/joshuaskelly) | [![Felix Siebeneicker](https://avatars0.githubusercontent.com/u/13063023?s=130)](https://github.com/pythooonuser) | [![Kovalchuk Evgeny](https://avatars0.githubusercontent.com/u/9695470?s=130)](https://github.com/Senpos)
+---|---|---
+[Joshua Skelton](http://github.com/joshuaskelly) | [Felix Siebeneicker](https://github.com/pythooonuser) | [Kovalchuk Evgeny](https://github.com/Senpos)
 
 ## Changelog
 For a detailed history of changes made to the twitchobserver see the [changelog](./CHANGELOG.md).
