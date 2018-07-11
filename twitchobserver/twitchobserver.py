@@ -7,16 +7,16 @@ import time
 import warnings
 
 
-class BadTwitchChatEvent(Exception):
+class BadEvent(Exception):
     """A class that is raised if a bad Twitch chat event occured."""
 
     pass
 
 
-class TwitchChatEvent(object):
+class Event(object):
     """A class for representing Twitch chat events.
     
-    :param type: Type of the event. Always will be 'TWITCHCHATEVENT'
+    :param type: Type of the event. Always will be 'EVENT'
     :param nickname: The nickname of the user
     :param channel: The name of the channel
     :param command: The command sent. Will be one of the following: JOIN, PART or PRIVMSG
@@ -25,25 +25,25 @@ class TwitchChatEvent(object):
 
     def __init__(self, channel=None, command=None, message=''):
         command_to_type = {
-            'JOIN': TwitchChatEventType.TWITCHCHATJOIN,
-            'PART': TwitchChatEventType.TWITCHCHATLEAVE,
-            'PRIVMSG': TwitchChatEventType.TWITCHCHATMESSAGE,
-            'MODE': TwitchChatEventType.TWITCHCHATMODE,
-            'CLEARCHAT': TwitchChatEventType.TWITCHCHATCLEARCHAT,
-            'HOSTTARGET': TwitchChatEventType.TWITCHCHATHOSTTARGET,
-            'NOTICE': TwitchChatEventType.TWITCHCHATNOTICE,
-            'RECONNECT': TwitchChatEventType.TWITCHCHATRECONNECT,
-            'ROOMSTATE': TwitchChatEventType.TWITCHCHATROOMSTATE,
-            'USERNOTICE': TwitchChatEventType.TWITCHCHATUSERNOTICE,
-            'USERSTATE': TwitchChatEventType.TWITCHCHATUSERSTATE,
-            'WHISPER': TwitchChatEventType.TWITCHCHATWHISPER
+            'JOIN': EventType.JOIN,
+            'PART': EventType.LEAVE,
+            'PRIVMSG': EventType.MESSAGE,
+            'MODE': EventType.MODE,
+            'CLEARCHAT': EventType.CLEARCHAT,
+            'HOSTTARGET': EventType.HOSTTARGET,
+            'NOTICE': EventType.NOTICE,
+            'RECONNECT': EventType.RECONNECT,
+            'ROOMSTATE': EventType.ROOMSTATE,
+            'USERNOTICE': EventType.USERNOTICE,
+            'USERSTATE': EventType.USERSTATE,
+            'WHISPER': EventType.WHISPER
         }
 
         if command in command_to_type:
             self.type = command_to_type[command]
 
         else:
-            self.type = TwitchChatEventType.TWITCHCHATCOMMAND
+            self.type = EventType.COMMAND
 
         self.channel = channel
         self._command = command
@@ -78,7 +78,7 @@ _whisper_params_re = re.compile('(\w+)\s+:([\s\S]*)')
 _mode_params_re = re.compile('#(\w+)\s+([+-]o)\s+(\w+)')
 
 
-class TwitchChatObserver(object):
+class Observer(object):
     """Class for watching a Twitch channel. Creates events for various chat messages.
     
     :param nickname: The user nickname to connect to the channel as
@@ -105,7 +105,7 @@ class TwitchChatObserver(object):
     def subscribe(self, callback):
         """Receive events from watched channel.
         
-        :param callback: A function that takes a single TwitchChatEvent argument
+        :param callback: A function that takes a single Event argument
         """
 
         self._subscribers.append(callback)
@@ -137,7 +137,7 @@ class TwitchChatObserver(object):
     def get_events(self):
         """Returns a sequence of events since the last time called.
         
-        :return: A sequence of TwitchChatEvents
+        :return: A sequence of Events
         """
 
         with self._inbound_lock:
@@ -151,8 +151,8 @@ class TwitchChatObserver(object):
 
         with self._outbound_lock:
             for event in events:
-                if not isinstance(event, TwitchChatEvent):
-                    raise BadTwitchChatEvent('Invalid event type: {}'.format(type(event)))
+                if not isinstance(event, Event):
+                    raise BadEvent('Invalid event type: {}'.format(type(event)))
 
                 self._outbound_event_queue.append(event)
 
@@ -162,7 +162,7 @@ class TwitchChatObserver(object):
         :param channel: The channel name
         """
 
-        self._send_events(TwitchChatEvent(channel, 'JOIN'))
+        self._send_events(Event(channel, 'JOIN'))
 
     def leave_channel(self, channel):
         """Leaves a channel.
@@ -170,7 +170,7 @@ class TwitchChatObserver(object):
         :param channel: The channel name
         """
         
-        self._send_events(TwitchChatEvent(channel, 'PART'))
+        self._send_events(Event(channel, 'PART'))
 
     def send_message(self, message, channel):
         """Sends a message to a channel.
@@ -179,7 +179,7 @@ class TwitchChatObserver(object):
         :param channel: The channel name
         """
 
-        self._send_events(TwitchChatEvent(channel, 'PRIVMSG', message))
+        self._send_events(Event(channel, 'PRIVMSG', message))
 
     def send_whisper(self, user, message):
         """Sends a whisper (private message) to a user.
@@ -352,13 +352,13 @@ class TwitchChatObserver(object):
 
         The handler needs to take an event as argument.
         
-        :param event_type: A ChatEventType to listen for
+        :param event_type: A EventType to listen for
 
         Usage:
         
         .. code:: python
 
-            >>> @observer.on_event(ChatEventType.TWITCHCHATJOIN)
+            >>> @observer.on_event(EventType.JOIN)
             >>> def handle_join_event(event):
             >>>     print(event.nickname + " joined")
         """
@@ -523,7 +523,7 @@ class TwitchChatObserver(object):
             match = _server_message_re.match(message)
             if match:
                 tags, nick, cmd, params = match.groups()
-                event = TwitchChatEvent(command=cmd)
+                event = Event(command=cmd)
                 event.nickname = nick
                 event._command = cmd
                 event._params = params
@@ -584,25 +584,25 @@ class TwitchChatObserver(object):
         self.stop()
 
 
-class TwitchChatEventType(object):
+class EventType(object):
     """A collection of twitch chat event types."""
 
-    TWITCHCHATJOIN = 'TWITCHCHATJOIN'
-    TWITCHCHATLEAVE = 'TWITCHCHATLEAVE'
-    TWITCHCHATMESSAGE = 'TWITCHCHATMESSAGE'
-    TWITCHCHATMODE = 'TWITCHCHATMODE'
-    TWITCHCHATCLEARCHAT = 'TWITCHCHATCLEARCHAT'
-    TWITCHCHATHOSTTARGET = 'TWITCHCHATHOSTTARGET'
-    TWITCHCHATNOTICE = 'TWITCHCHATNOTICE'
-    TWITCHCHATRECONNECT = 'TWITCHCHATRECONNECT'
-    TWITCHCHATROOMSTATE = 'TWITCHCHATROOMSTATE'
-    TWITCHCHATUSERNOTICE = 'TWITCHCHATUSERNOTICE'
-    TWITCHCHATUSERSTATE = 'TWITCHCHATUSERSTATE'
-    TWITCHCHATWHISPER = 'TWITCHCHATWHISPER'
-    TWITCHCHATCOMMAND = 'TWITCHCHATCOMMAND'
+    JOIN = 'TWITCHCHATJOIN'
+    LEAVE = 'TWITCHCHATLEAVE'
+    MESSAGE = 'TWITCHCHATMESSAGE'
+    MODE = 'TWITCHCHATMODE'
+    CLEARCHAT = 'TWITCHCHATCLEARCHAT'
+    HOSTTARGET = 'TWITCHCHATHOSTTARGET'
+    NOTICE = 'TWITCHCHATNOTICE'
+    RECONNECT = 'TWITCHCHATRECONNECT'
+    ROOMSTATE = 'TWITCHCHATROOMSTATE'
+    USERNOTICE = 'TWITCHCHATUSERNOTICE'
+    USERSTATE = 'TWITCHCHATUSERSTATE'
+    WHISPER = 'TWITCHCHATWHISPER'
+    COMMAND = 'TWITCHCHATCOMMAND'
 
 
-class TwitchChatColor(object):
+class Color(object):
     """A collection of colors for the chat name."""
 
     BLUE = "Blue"
